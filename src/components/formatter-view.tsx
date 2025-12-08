@@ -11,7 +11,7 @@ import { Copy, Download, Trash2, ShieldCheck, FileCheck } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format as prettierFormat } from 'prettier/standalone';
 import prettierPluginEstree from 'prettier/plugins/estree';
-import prettierPluginXml from 'prettier/plugins/xml';
+import prettierPluginXml from '@prettier/plugin-xml';
 import prettierPluginBabel from 'prettier/plugins/babel';
 
 
