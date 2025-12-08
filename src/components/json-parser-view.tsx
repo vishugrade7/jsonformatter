@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { JsonTreeView } from '@/components/json-tree-view';
 import { useToast } from '@/hooks/use-toast';
-import { Share2, Trash2 } from 'lucide-react';
+import { ShieldCheck, Trash2 } from 'lucide-react';
 
 export function JsonParserView() {
   const [input, setInput] = useState('');
@@ -37,7 +37,7 @@ export function JsonParserView() {
         });
     } else {
         toast({
-            title: 'JSON Parsed Successfully!',
+            title: 'JSON Valid & Parsed!',
             description: 'The JSON tree has been generated.',
         });
     }
@@ -56,9 +56,9 @@ export function JsonParserView() {
             <CardDescription>Paste your JSON to parse it.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={handleParse}>
-                <Share2 className="h-4 w-4" />
-                <span className="sr-only">Parse</span>
+            <Button variant="outline" onClick={handleParse}>
+                <ShieldCheck className="h-4 w-4 mr-2" />
+                Validate
             </Button>
             <Button variant="destructive" size="icon" onClick={handleClear}>
                 <Trash2 className="h-4 w-4" />
