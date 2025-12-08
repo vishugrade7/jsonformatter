@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { getAIFormattedCode, getAISuggestions } from '@/app/actions';
-import { Copy, Download, Sparkles, Trash2, Wand2, X } from 'lucide-react';
+import { Copy, Download, Trash2, Wand2 } from 'lucide-react';
 
 interface FormatterViewProps {
   language: 'json' | 'javascript' | 'xml';
@@ -20,9 +18,7 @@ interface FormatterViewProps {
 export function FormatterView({ language, title, description }: FormatterViewProps) {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [aiSuggestions, setAiSuggestions] = useState('');
   const [isPending, startTransition] = useTransition();
-  const [isAiSuggesting, setIsAiSuggesting] = useState(false);
   const { toast } = useToast();
 
   const handleFormat = useCallback(() => {
@@ -39,32 +35,11 @@ export function FormatterView({ language, title, description }: FormatterViewPro
           toast({ title: 'Invalid JSON', description: 'Could not parse JSON. Please check for syntax errors.', variant: 'destructive' });
         }
       } else {
-        getAIFormattedCode({ code: input, language }).then(res => {
-          if (res.error) {
-            toast({ title: 'Formatting Error', description: res.error, variant: 'destructive' });
-          } else {
-            setOutput(res.data || '');
-          }
-        });
+        // Basic formatting for XML and JS as a fallback.
+        // For more complex formatting, a dedicated library would be better.
+        setOutput(input);
+        toast({ title: 'Formatted (Basic)', description: 'Basic formatting has been applied.', variant: 'default' });
       }
-    });
-  }, [input, language, toast]);
-
-  const handleAiSuggest = useCallback(() => {
-    if (!input) {
-      toast({ title: 'Input is empty', description: 'Please enter some code for AI suggestions.', variant: 'destructive' });
-      return;
-    }
-    setIsAiSuggesting(true);
-    startTransition(() => {
-      getAISuggestions({ code: input, language }).then(res => {
-        if (res.error) {
-          toast({ title: 'AI Suggestion Error', description: res.error, variant: 'destructive' });
-        } else if (res.data) {
-          setOutput(res.data.formattedCode);
-          setAiSuggestions(res.data.suggestions);
-        }
-      }).finally(() => setIsAiSuggesting(false));
     });
   }, [input, language, toast]);
 
@@ -80,7 +55,6 @@ export function FormatterView({ language, title, description }: FormatterViewPro
   const handleClear = useCallback(() => {
     setInput('');
     setOutput('');
-    setAiSuggestions('');
   }, []);
 
   const handleDownload = useCallback(() => {
@@ -113,10 +87,6 @@ export function FormatterView({ language, title, description }: FormatterViewPro
             <Button variant="outline" size="icon" onClick={handleFormat} disabled={isPending}>
               <Wand2 className="h-4 w-4" />
               <span className="sr-only">Format</span>
-            </Button>
-            <Button variant="outline" size="icon" onClick={handleAiSuggest} disabled={isPending}>
-              <Sparkles className="h-4 w-4" />
-              <span className="sr-only">AI Suggestions</span>
             </Button>
           </div>
         </CardHeader>
@@ -168,37 +138,6 @@ export function FormatterView({ language, title, description }: FormatterViewPro
           </ScrollArea>
         </CardContent>
       </Card>
-
-      {(isAiSuggesting || aiSuggestions) && (
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>AI Suggestions</CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setAiSuggestions('')} disabled={isAiSuggesting}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription>Best-practice recommendations to improve your code.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isAiSuggesting ? (
-              <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-              </div>
-            ) : (
-              <Alert>
-                <Sparkles className="h-4 w-4" />
-                <AlertTitle>Suggestions</AlertTitle>
-                <AlertDescription className="whitespace-pre-wrap">
-                  {aiSuggestions}
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

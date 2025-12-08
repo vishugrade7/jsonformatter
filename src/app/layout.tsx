@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'Formatastic',
-  description: 'An elegant and powerful tool to format, parse, and beautify your code, including JSON, XML, and JavaScript. Featuring AI-powered suggestions for optimal formatting.',
+  description: 'An elegant and powerful tool to format, parse, and beautify your code, including JSON, XML, and JavaScript.',
 };
 
 export default function RootLayout({
