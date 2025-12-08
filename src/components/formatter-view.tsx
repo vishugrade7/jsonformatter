@@ -139,7 +139,7 @@ export function FormatterView({ language, title, description }: FormatterViewPro
             </Select>
             <Button onClick={handleFormat} disabled={isPending}>
               <FileCheck className="h-4 w-4 mr-2" />
-              Format / Beautify
+              Format
             </Button>
           </div>
         </CardHeader>

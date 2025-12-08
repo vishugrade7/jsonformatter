@@ -13,10 +13,10 @@ const getRenderableItems = (data: any) => {
 
 const Value = ({ value }: { value: any }) => {
     const type = typeof value;
-    if (value === null) return <span className="text-purple-500">null</span>;
-    if (type === 'string') return <span className="text-green-600 dark:text-green-400">"{value}"</span>;
-    if (type === 'number') return <span className="text-blue-600 dark:text-blue-400">{value}</span>;
-    if (type === 'boolean') return <span className="text-purple-500">{String(value)}</span>;
+    if (value === null) return <span className="text-fuchsia-500 dark:text-fuchsia-400">null</span>;
+    if (type === 'string') return <span className="text-emerald-600 dark:text-emerald-400">"{value}"</span>;
+    if (type === 'number') return <span className="text-sky-600 dark:text-sky-400">{value}</span>;
+    if (type === 'boolean') return <span className="text-fuchsia-500 dark:text-fuchsia-400">{String(value)}</span>;
     return null;
 };
 
@@ -30,7 +30,7 @@ const JsonNode = ({ name, data, isRoot = false }: { name?: string, data: any, is
     if (!isObject) {
         return (
             <div className="flex items-center">
-                <span className="text-red-600 dark:text-red-400 font-medium pr-2">"{name}":</span>
+                <span className="text-rose-600 dark:text-rose-400 font-medium pr-2">"{name}":</span>
                 <Value value={data} />
             </div>
         );
@@ -40,7 +40,7 @@ const JsonNode = ({ name, data, isRoot = false }: { name?: string, data: any, is
         <CollapsibleTrigger asChild>
             <div className="flex items-center cursor-pointer w-full">
                 <ChevronRight className={cn("h-4 w-4 shrink-0 transition-transform duration-200", isOpen && "rotate-90")} />
-                <span className="text-red-600 dark:text-red-400 font-medium pl-1 pr-2">{name ? `"${name}":` : ''}</span>
+                <span className="text-rose-600 dark:text-rose-400 font-medium pl-1 pr-2">{name ? `"${name}":` : ''}</span>
                 <span className="text-muted-foreground">{isArray ? '[' : '{'}</span>
                 {!isOpen && <span className="text-muted-foreground ml-1">{items.length} {itemType}...</span>}
                 {!isOpen && <span className="text-muted-foreground ml-1">{isArray ? ']' : '}'}</span>}

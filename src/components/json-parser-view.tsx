@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { JsonTreeView } from '@/components/json-tree-view';
 import { useToast } from '@/hooks/use-toast';
-import { ShieldCheck, Trash2 } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export function JsonParserView() {
   const [input, setInput] = useState('');
@@ -43,10 +43,6 @@ export function JsonParserView() {
     }
   }, [input, parsedJson, toast]);
 
-  const handleClear = useCallback(() => {
-    setInput('');
-  }, []);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -58,11 +54,7 @@ export function JsonParserView() {
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleParse}>
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                Validate
-            </Button>
-            <Button variant="destructive" size="icon" onClick={handleClear}>
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Clear</span>
+                Validate & Parse
             </Button>
           </div>
         </CardHeader>
