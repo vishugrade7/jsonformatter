@@ -13,9 +13,9 @@ import {
 
 const tabs = [
   { value: 'json-editor', label: 'JSON Editor' },
+  { value: 'xml-editor', label: 'XML Editor' },
   { value: 'json-beautifier', label: 'JSON Beautifier' },
   { value: 'json-parser', label: 'JSON Parser' },
-  { value: 'xml-formatter', label: 'XML Formatter' },
   { value: 'js-beautifier', label: 'JS Beautifier' },
 ];
 
@@ -27,12 +27,18 @@ export function FormatterTabs() {
   const currentTab = pathname.substring(1);
 
   const onTabChange = (value: string) => {
-    router.push(`/${value}`);
+    if (value === 'xml-formatter') {
+        router.push('/xml-editor');
+    } else {
+        router.push(`/${value}`);
+    }
   };
+  
+  const displayTab = currentTab === 'xml-formatter' ? 'xml-editor' : currentTab;
 
   if (isMobile) {
     return (
-      <Select value={currentTab} onValueChange={onTabChange}>
+      <Select value={displayTab} onValueChange={onTabChange}>
         <SelectTrigger className="w-[150px]">
           <SelectValue placeholder="Select a tool" />
         </SelectTrigger>
@@ -48,10 +54,10 @@ export function FormatterTabs() {
   }
 
   return (
-    <Tabs value={currentTab} onValueChange={onTabChange} className="w-full">
+    <Tabs value={displayTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="hidden md:grid w-full max-w-2xl grid-cols-5 h-10">
         {tabs.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value}>
+          <TabsTrigger key={tab.value} value={tab.value.replace('xml-formatter', 'xml-editor')}>
             {tab.label}
           </TabsTrigger>
         ))}

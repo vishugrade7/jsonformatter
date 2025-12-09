@@ -1,11 +1,6 @@
-import { FormatterView } from '@/components/formatter-view';
+import { redirect } from 'next/navigation';
 
 export default function XMLFormatterPage() {
-  return (
-    <FormatterView
-      language="xml"
-      title="XML Formatter"
-      description="Format your XML for improved readability and structure."
-    />
-  );
+  // Redirect to the new, more advanced XML editor
+  redirect('/xml-editor');
 }
