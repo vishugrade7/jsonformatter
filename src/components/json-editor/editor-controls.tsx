@@ -27,7 +27,7 @@ import { Checkbox } from '../ui/checkbox';
 interface EditorControlsProps {
   onUpload: (content: string) => void;
   onValidate: () => void;
-  onFormat: (side: 'left' | 'right') => void;
+  onFormat: () => void;
   onMinify: () => void;
   onDownload: (side: 'left' | 'right') => void;
   onCompare: (isComparing: boolean) => void;
@@ -97,7 +97,7 @@ export function EditorControls({
           </SelectContent>
         </Select>
 
-        <Button variant="outline" onClick={() => onFormat('left')}>
+        <Button variant="outline" onClick={onFormat}>
           Format / Beautify
         </Button>
       </div>

@@ -128,37 +128,31 @@ export function EditorView() {
         }
     };
 
-    const handleFormat = useCallback(async (side: 'left' | 'right') => {
-        const formatValue = async (value: string, setter: (val: string) => void, lang: 'json' | 'xml') => {
-            if (!value) return true; // Nothing to format
-            try {
-                const formatted = await prettierFormat(value, {
-                  parser: lang,
-                  plugins: [prettierPluginBabel, prettierPluginEstree],
-                  tabWidth: parseInt(indent, 10),
-                });
-                setter(formatted);
-                return true;
-            } catch (error: any) {
-                return false;
-            }
+    const handleFormat = useCallback(async (side: 'left' | 'right', outputTo: 'self' | 'right' = 'self') => {
+        const value = side === 'left' ? leftValue : rightValue;
+        const lang = side === 'left' ? 'json' : rightLang;
+        let setter = side === 'left' ? setLeftValue : setRightValue;
+        
+        if (outputTo === 'right') {
+            setter = setRightValue;
         }
 
-        let success = true;
-        if (side === 'left') {
-            success = await formatValue(leftValue, setLeftValue, 'json');
-        } else { // side === 'right'
-            if (rightLang === 'json') {
-                success = await formatValue(rightValue, setRightValue, 'json');
-            }
+        if (!value) {
+            toast({ title: 'Input is empty', description: `Editor on the ${side} is empty.`, variant: 'destructive' });
+            return;
         }
-
-        if (!success) {
-             toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
-        } else {
-             toast({ title: 'JSON Formatted' });
+        
+        try {
+            const formatted = await prettierFormat(value, {
+              parser: lang,
+              plugins: [prettierPluginBabel, prettierPluginEstree],
+              tabWidth: parseInt(indent, 10),
+            });
+            setter(formatted);
+            toast({ title: 'JSON Formatted' });
+        } catch (error: any) {
+            toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
         }
-
     }, [leftValue, rightValue, indent, toast, rightLang]);
 
     const handleSort = useCallback((side: 'left' | 'right') => {
@@ -231,15 +225,13 @@ export function EditorView() {
     };
 
     const handleMinify = () => {
+        if (!leftValue) {
+            toast({ title: 'Input is empty', description: 'Please enter JSON in the left editor to minify.', variant: 'destructive'});
+            return;
+        }
         try {
-            if (leftValue) {
-                const parsed = JSON.parse(leftValue);
-                setLeftValue(JSON.stringify(parsed));
-            }
-            if (rightValue && rightLang === 'json') {
-                const parsed = JSON.parse(rightValue);
-                setRightValue(JSON.stringify(parsed));
-            }
+            const parsed = JSON.parse(leftValue);
+            setRightValue(JSON.stringify(parsed));
             toast({ title: 'JSON Minified' });
         } catch (error) {
             toast({ title: 'Minify Error', description: 'Invalid JSON.', variant: 'destructive' });
@@ -396,7 +388,7 @@ export function EditorView() {
             <EditorControls
                 onUpload={handleUpload}
                 onValidate={handleValidate}
-                onFormat={() => handleFormat('left')}
+                onFormat={() => handleFormat('left', 'right')}
                 onMinify={handleMinify}
                 onDownload={handleDownload}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}
