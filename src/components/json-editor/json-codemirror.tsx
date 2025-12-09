@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
@@ -30,6 +30,11 @@ export const JsonCodeMirror = forwardRef<
     const editorRef = useRef<any>(null);
     const mergeViewRef = useRef<HTMLDivElement>(null);
     const mergeInstanceRef = useRef<MergeView | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     useImperativeHandle(ref, () => ({
         editor: {
@@ -55,7 +60,7 @@ export const JsonCodeMirror = forwardRef<
       }));
 
     useEffect(() => {
-        if (isComparing && mergeViewRef.current) {
+        if (isComparing && mergeViewRef.current && isMounted) {
             if (mergeInstanceRef.current) {
                 mergeInstanceRef.current.destroy();
             }
@@ -97,7 +102,7 @@ export const JsonCodeMirror = forwardRef<
             mergeInstanceRef.current = null;
         }
 
-    }, [isComparing, otherValue, value, resolvedTheme]);
+    }, [isComparing, otherValue, value, resolvedTheme, isMounted]);
     
     useEffect(() => {
       return () => {
@@ -107,6 +112,10 @@ export const JsonCodeMirror = forwardRef<
           }
       };
     }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     if (isComparing) {
         return <div ref={mergeViewRef} className="absolute inset-0" />;
