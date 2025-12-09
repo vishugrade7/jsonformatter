@@ -108,12 +108,12 @@ export function EditorView() {
         }
     };
 
-    const handleFormat = useCallback(async (side?: 'left' | 'right') => {
-        const formatValue = async (value: string, setter: (val: string) => void) => {
-            if (!value) return;
+    const handleFormat = useCallback(async (side: 'left' | 'right') => {
+        const formatValue = async (value: string, setter: (val: string) => void, lang: 'json' | 'xml') => {
+            if (!value) return true; // Nothing to format
             try {
                 const formatted = await prettierFormat(value, {
-                  parser: 'json',
+                  parser: lang,
                   plugins: [prettierPluginBabel, prettierPluginEstree],
                   tabWidth: parseInt(indent, 10),
                 });
@@ -124,20 +124,17 @@ export function EditorView() {
             }
         }
 
-        let formattedLeft = true;
-        let formattedRight = true;
-
-        if (side === 'left' || !side) {
-            formattedLeft = await formatValue(leftValue, setLeftValue);
-        }
-        if (side === 'right' || !side) {
+        let success = true;
+        if (side === 'left') {
+            success = await formatValue(leftValue, setLeftValue, 'json');
+        } else { // side === 'right'
             if (rightLang === 'json') {
-                formattedRight = await formatValue(rightValue, setRightValue);
+                success = await formatValue(rightValue, setRightValue, 'json');
             }
         }
 
-        if ((side === 'left' && !formattedLeft) || (side === 'right' && !formattedRight) || (!side && (!formattedLeft || !formattedRight))) {
-             toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
+        if (!success) {
+             toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
         } else {
              toast({ title: 'JSON Formatted' });
         }
@@ -324,7 +321,7 @@ export function EditorView() {
             <EditorControls
                 onUpload={handleUpload}
                 onValidate={handleValidate}
-                onFormat={() => handleFormat()}
+                onFormat={() => handleFormat('left')}
                 onMinify={handleMinify}
                 onDownload={handleDownload}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}

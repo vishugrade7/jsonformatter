@@ -27,7 +27,7 @@ import { Checkbox } from '../ui/checkbox';
 interface EditorControlsProps {
   onUpload: (content: string) => void;
   onValidate: () => void;
-  onFormat: () => void;
+  onFormat: (side: 'left' | 'right') => void;
   onMinify: () => void;
   onDownload: (side: 'left' | 'right') => void;
   onCompare: (isComparing: boolean) => void;
@@ -97,7 +97,7 @@ export function EditorControls({
           </SelectContent>
         </Select>
 
-        <Button variant="outline" onClick={onFormat}>
+        <Button variant="outline" onClick={() => onFormat('left')}>
           Format / Beautify
         </Button>
       </div>
@@ -129,7 +129,7 @@ export function EditorControls({
           <Minimize className="mr-2 h-4 w-4" /> Minify / Compact
         </Button>
 
-        <Select onValueChange={(value: 'xml' | 'csv') => onConvert(value)}>
+        <Select onValueChange={(value) => onConvert(value as 'xml' | 'csv')}>
           <SelectTrigger>
             <SelectValue placeholder="Convert JSON to" />
           </SelectTrigger>
