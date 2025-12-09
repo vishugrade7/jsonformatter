@@ -309,24 +309,60 @@ export function EditorView() {
         if (!value) return;
 
         try {
-            // A simple repair attempt. More sophisticated logic could be added.
+            // First, try to parse it as is.
+            JSON.parse(value);
+            toast({ title: 'JSON is already valid', description: 'No repair needed.' });
+            return;
+        } catch (e) {
+            // JSON is invalid, proceed with repair attempts.
+        }
+
+        try {
+            let repaired = value;
+
             // 1. Add missing quotes to keys
-            let repaired = value.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+            repaired = repaired.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
             // 2. Replace single quotes with double quotes
             repaired = repaired.replace(/'/g, '"');
             // 3. Remove trailing commas in objects and arrays
             repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
             // 4. Add missing commas between properties
-            repaired = repaired.replace(/([}\]"'])\s*\n\s*(["{])/g, '$1,\n$2');
-
-
-            // Validate the repaired json
-            JSON.parse(repaired);
+            repaired = repaired.replace(/([}\]"'])\s*\n\s*([\\"{])/g, '$1,\n$2');
             
-            const setter = side === 'left' ? setLeftValue : setRightValue;
-            setter(repaired);
+            // 5. Attempt to fix structural issues (missing brackets/braces)
+            const stack: ('{' | '[')[] = [];
+            for (const char of repaired) {
+                if (char === '{' || char === '[') {
+                    stack.push(char);
+                } else if (char === '}') {
+                    if (stack.length > 0 && stack[stack.length - 1] === '{') {
+                        stack.pop();
+                    }
+                } else if (char === ']') {
+                    if (stack.length > 0 && stack[stack.length - 1] === '[') {
+                        stack.pop();
+                    }
+                }
+            }
 
-            toast({ title: 'JSON Repaired', description: 'Attempted to fix common JSON errors.' });
+            // Add missing closing characters
+            while (stack.length > 0) {
+                const openChar = stack.pop();
+                if (openChar === '{') {
+                    repaired += '}';
+                } else if (openChar === '[') {
+                    repaired += ']';
+                }
+            }
+
+            // Final validation attempt
+            const parsed = JSON.parse(repaired);
+            const formatted = JSON.stringify(parsed, null, parseInt(indent, 10));
+
+            const setter = side === 'left' ? setLeftValue : setRightValue;
+            setter(formatted);
+
+            toast({ title: 'JSON Repaired', description: 'Successfully fixed common JSON errors.' });
         } catch (e) {
             toast({ title: 'Repair Failed', description: 'Could not automatically repair the JSON.', variant: 'destructive' });
         }
