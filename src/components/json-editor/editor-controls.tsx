@@ -135,7 +135,7 @@ export function EditorControls({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="xml">XML</SelectItem>
-            <SelectItem value="csv" disabled>CSV (coming soon)</SelectItem>
+            <SelectItem value="csv">CSV</SelectItem>
           </SelectContent>
         </Select>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { JsonCodeMirror, type CodeMirrorEditor } from './json-codemirror';
 import { EditorControls } from './editor-controls';
 import { EmptyState } from './empty-state';
@@ -10,6 +10,7 @@ import { format as prettierFormat } from 'prettier/standalone';
 import prettierPluginBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import { json2xml } from 'xml-js';
+import Papa from 'papaparse';
 
 const initialJson = `{
   "array": [
@@ -56,6 +57,20 @@ export function EditorView() {
 
     const leftEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
     const rightEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
+
+    const rightLang = useMemo<'json' | 'xml'>(() => {
+        const trimmed = rightValue.trim();
+        if (trimmed.startsWith('<')) {
+            return 'xml';
+        }
+        try {
+            JSON.parse(trimmed);
+            return 'json';
+        } catch {
+            // It could be CSV or something else, default to json for highlighting
+            return 'json';
+        }
+    }, [rightValue]);
 
     const handleCopy = useCallback((from: string, to: 'left' | 'right') => {
         try {
@@ -116,7 +131,9 @@ export function EditorView() {
             formattedLeft = await formatValue(leftValue, setLeftValue);
         }
         if (side === 'right' || !side) {
-            formattedRight = await formatValue(rightValue, setRightValue);
+            if (rightLang === 'json') {
+                formattedRight = await formatValue(rightValue, setRightValue);
+            }
         }
 
         if ((side === 'left' && !formattedLeft) || (side === 'right' && !formattedRight) || (!side && (!formattedLeft || !formattedRight))) {
@@ -125,7 +142,7 @@ export function EditorView() {
              toast({ title: 'JSON Formatted' });
         }
 
-    }, [leftValue, rightValue, indent, toast]);
+    }, [leftValue, rightValue, indent, toast, rightLang]);
 
     const handleSort = useCallback((side: 'left' | 'right') => {
         const value = side === 'left' ? leftValue : rightValue;
@@ -180,12 +197,12 @@ export function EditorView() {
             leftValid = false;
         }
         try {
-            if(rightValue) JSON.parse(rightValue);
+            if(rightValue && rightLang === 'json') JSON.parse(rightValue);
         } catch {
             rightValid = false;
         }
 
-        if (leftValid && rightValid) {
+        if (leftValid && (rightValid || rightLang !== 'json')) {
             toast({ title: 'Validation Successful', description: 'Both JSON documents are valid.' });
         } else {
             let description = '';
@@ -202,7 +219,7 @@ export function EditorView() {
                 const parsed = JSON.parse(leftValue);
                 setLeftValue(JSON.stringify(parsed));
             }
-            if (rightValue) {
+            if (rightValue && rightLang === 'json') {
                 const parsed = JSON.parse(rightValue);
                 setRightValue(JSON.stringify(parsed));
             }
@@ -218,11 +235,12 @@ export function EditorView() {
             toast({ title: 'Nothing to download', variant: 'destructive' });
             return;
         }
-        const blob = new Blob([value], { type: 'application/json' });
+        const lang = side === 'left' ? 'json' : rightLang;
+        const blob = new Blob([value], { type: lang === 'xml' ? 'application/xml' : 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `data-${side}.json`;
+        a.download = `data-${side}.${lang}`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -248,18 +266,28 @@ export function EditorView() {
     }
 
     const handleConvert = (format: 'xml' | 'csv') => {
-        if (format === 'xml') {
-            try {
-                if (!leftValue) {
-                    toast({ title: 'Input is empty', description: 'Please enter JSON in the left editor to convert.', variant: 'destructive'});
-                    return;
-                }
+        if (!leftValue) {
+            toast({ title: 'Input is empty', description: 'Please enter JSON in the left editor to convert.', variant: 'destructive'});
+            return;
+        }
+
+        try {
+            if (format === 'xml') {
                 const xml = json2xml(leftValue, { compact: false, spaces: parseInt(indent, 10) });
                 setRightValue(xml);
                 toast({ title: 'Converted to XML' });
-            } catch (e: any) {
-                toast({ title: 'Conversion Error', description: 'Invalid JSON.', variant: 'destructive' });
+            } else if (format === 'csv') {
+                const json = JSON.parse(leftValue);
+                if (!Array.isArray(json)) {
+                    toast({ title: 'Conversion Error', description: 'CSV conversion only supports an array of objects.', variant: 'destructive' });
+                    return;
+                }
+                const csv = Papa.unparse(json);
+                setRightValue(csv);
+                toast({ title: 'Converted to CSV' });
             }
+        } catch (e: any) {
+            toast({ title: 'Conversion Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
     };
 
@@ -328,7 +356,7 @@ export function EditorView() {
                             onChange={setRightValue}
                             isComparing={isComparing}
                             otherValue={leftValue}
-                            language={rightValue.trim().startsWith('<') ? 'xml' : 'json'}
+                            language={rightLang}
                         />
                     ) : (
                         <EmptyState onCreateObject={() => createObject('right')} onCreateArray={() => createArray('right')} />
