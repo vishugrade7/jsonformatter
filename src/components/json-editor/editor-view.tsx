@@ -14,6 +14,7 @@ import { json2xml } from 'xml-js';
 import Papa from 'papaparse';
 import { JsonTreeView } from '../json-tree-view';
 import { ScrollArea } from '../ui/scroll-area';
+import { JsonFormView } from '../json-form-view';
 
 const initialJson = `{
   "array": [
@@ -128,30 +129,26 @@ export function EditorView() {
         }
     };
 
-    const handleFormat = useCallback(async (side: 'left' | 'right', outputTo: 'self' | 'right' = 'self') => {
-        const value = side === 'left' ? leftValue : rightValue;
-        const setter = outputTo === 'right' ? setRightValue : (side === 'left' ? setLeftValue : setRightValue);
-        const viewModeSetter = outputTo === 'right' ? setRightViewMode : (side === 'left' ? setLeftViewMode : setRightViewMode);
-        const lang = side === 'left' ? 'json' : rightLang;
-
+    const handleFormat = useCallback(async () => {
+        const value = leftValue;
         if (!value) {
-            toast({ title: 'Input is empty', description: `Editor on the ${side} is empty.`, variant: 'destructive' });
+            toast({ title: 'Input is empty', description: `Editor on the left is empty.`, variant: 'destructive' });
             return;
         }
         
         try {
             const formatted = await prettierFormat(value, {
-              parser: lang === 'text' ? 'json' : lang, // Default to json parser for text
-              plugins: [prettierPluginBabel, prettierPluginEstree, prettierPluginXml],
+              parser: 'json',
+              plugins: [prettierPluginBabel, prettierPluginEstree],
               tabWidth: parseInt(indent, 10),
             });
-            setter(formatted);
-            viewModeSetter('code');
+            setRightValue(formatted);
+            setRightViewMode('code');
             toast({ title: 'JSON Formatted' });
         } catch (error: any) {
             toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
         }
-    }, [leftValue, rightValue, indent, toast, rightLang]);
+    }, [leftValue, indent, toast]);
 
     const handleSort = useCallback((side: 'left' | 'right') => {
         const value = side === 'left' ? leftValue : rightValue;
@@ -199,23 +196,16 @@ export function EditorView() {
 
     const handleValidate = () => {
         let leftValid = true;
-        let rightValid = true;
         try {
             if(leftValue) JSON.parse(leftValue);
         } catch {
             leftValid = false;
         }
-        try {
-            if(rightValue && rightLang === 'json') JSON.parse(rightValue);
-        } catch {
-            rightValid = false;
-        }
-
-        if (leftValid && (rightValid || rightLang !== 'json')) {
+        
+        if (leftValid) {
             toast({ title: 'Validation Successful', description: 'JSON document is valid.' });
         } else {
-            let description = 'The JSON document is invalid.';
-            toast({ title: 'Validation Failed', description, variant: 'destructive' });
+            toast({ title: 'Validation Failed', description: 'The JSON document is invalid.', variant: 'destructive' });
         }
     };
 
@@ -297,6 +287,17 @@ export function EditorView() {
             toast({ title: 'Conversion Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
     };
+    
+    const onDataChange = useCallback((newData: any, side: 'left' | 'right') => {
+        const setter = side === 'left' ? setLeftValue : setRightValue;
+        try {
+            const jsonString = JSON.stringify(newData, null, parseInt(indent, 10));
+            setter(jsonString);
+        } catch (e) {
+            console.error("Failed to stringify new data", e);
+        }
+    }, [indent]);
+
 
     if (!isMounted) {
         return null;
@@ -327,7 +328,16 @@ export function EditorView() {
                     </ScrollArea>
                 );
             case 'form':
-                return <div className="p-4 text-muted-foreground">Form view coming soon...</div>;
+                if (parsedJson?.error) {
+                    return <div className="p-4 text-destructive">Invalid JSON for Form view.</div>;
+                }
+                 return (
+                    <ScrollArea className="h-full">
+                        <div className="p-4">
+                             <JsonFormView data={parsedJson} onChange={(newData) => onDataChange(newData, side)} />
+                        </div>
+                    </ScrollArea>
+                );
             case 'text':
                 return (
                     <JsonCodeMirror
@@ -367,7 +377,7 @@ export function EditorView() {
             <div className="flex-1 flex flex-col border-r border-border">
                 <Toolbar 
                     onCopy={() => handleCopyToClipboard('left')} 
-                    onFormat={() => handleFormat('left', 'self')}
+                    onFormat={() => handleFormat()}
                     onSort={() => handleSort('left')}
                     onUndo={() => handleUndo('left')}
                     onRedo={() => handleRedo('left')}
@@ -385,9 +395,9 @@ export function EditorView() {
             <EditorControls
                 onUpload={handleUpload}
                 onValidate={handleValidate}
-                onFormat={() => handleFormat('left', 'right')}
+                onFormat={handleFormat}
                 onMinify={handleMinify}
-                onDownload={handleDownload}
+                onDownload={() => handleDownload('left')}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}
                 onCopyRightToLeft={() => handleCopy(rightValue, 'left')}
                 onCompare={setIsComparing}
@@ -401,7 +411,9 @@ export function EditorView() {
             <div className="flex-1 flex flex-col">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
-                    onFormat={() => handleFormat('right', 'self')}
+                    onFormat={() => {
+                        toast({ title: "Cannot format this view", description: "Formatting is only available for the main input editor.", variant: "destructive" });
+                    }}
                     onSort={() => handleSort('right')}
                     onUndo={() => handleUndo('right')}
                     onRedo={() => handleRedo('right')}
