@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { JsonCodeMirror, type CodeMirrorEditor } from './json-codemirror';
 import { EditorControls } from './editor-controls';
 import { EmptyState } from './empty-state';
@@ -45,6 +45,7 @@ export function EditorView() {
     const [leftValue, setLeftValue] = useState(initialJson);
     const [rightValue, setRightValue] = useState('');
     const [isComparing, setIsComparing] = useState(false);
+    const [indent, setIndent] = useState('2');
     const { toast } = useToast();
 
     const leftEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
@@ -53,7 +54,7 @@ export function EditorView() {
     const handleCopy = useCallback((from: string, to: 'left' | 'right') => {
         try {
             const parsed = JSON.parse(from);
-            const formatted = JSON.stringify(parsed, null, 2);
+            const formatted = JSON.stringify(parsed, null, parseInt(indent, 10));
             if (to === 'left') {
                 setLeftValue(formatted);
             } else {
@@ -66,10 +67,10 @@ export function EditorView() {
                 setRightValue(from);
             }
         }
-    }, []);
+    }, [indent]);
 
     const createObject = (side: 'left' | 'right') => {
-        const objectJson = JSON.stringify({}, null, 2);
+        const objectJson = JSON.stringify({}, null, parseInt(indent, 10));
         if (side === 'left') {
             setLeftValue(objectJson);
         } else {
@@ -78,7 +79,7 @@ export function EditorView() {
     };
 
     const createArray = (side: 'left' | 'right') => {
-        const arrayJson = JSON.stringify([], null, 2);
+        const arrayJson = JSON.stringify([], null, parseInt(indent, 10));
         if (side === 'left') {
             setLeftValue(arrayJson);
         } else {
@@ -86,26 +87,39 @@ export function EditorView() {
         }
     };
 
-    const handleFormat = useCallback(async (side: 'left' | 'right') => {
-        const value = side === 'left' ? leftValue : rightValue;
-        if (!value) return;
-
-        try {
-            const formatted = await prettierFormat(value, {
-              parser: 'json',
-              plugins: [prettierPluginBabel, prettierPluginEstree],
-              tabWidth: 2,
-            });
-            if (side === 'left') {
-                setLeftValue(formatted);
-            } else {
-                setRightValue(formatted);
+    const handleFormat = useCallback(async (side?: 'left' | 'right') => {
+        const formatValue = async (value: string, setter: (val: string) => void) => {
+            if (!value) return;
+            try {
+                const formatted = await prettierFormat(value, {
+                  parser: 'json',
+                  plugins: [prettierPluginBabel, prettierPluginEstree],
+                  tabWidth: parseInt(indent, 10),
+                });
+                setter(formatted);
+                return true;
+            } catch (error: any) {
+                return false;
             }
-            toast({ title: 'JSON Formatted' });
-        } catch (error: any) {
-            toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
-    }, [leftValue, rightValue, toast]);
+
+        let formattedLeft = true;
+        let formattedRight = true;
+
+        if (side === 'left' || !side) {
+            formattedLeft = await formatValue(leftValue, setLeftValue);
+        }
+        if (side === 'right' || !side) {
+            formattedRight = await formatValue(rightValue, setRightValue);
+        }
+
+        if ((side === 'left' && !formattedLeft) || (side === 'right' && !formattedRight) || (!side && (!formattedLeft || !formattedRight))) {
+             toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
+        } else {
+             toast({ title: 'JSON Formatted' });
+        }
+
+    }, [leftValue, rightValue, indent, toast]);
 
     const handleSort = useCallback((side: 'left' | 'right') => {
         const value = side === 'left' ? leftValue : rightValue;
@@ -114,7 +128,7 @@ export function EditorView() {
         try {
             const parsed = JSON.parse(value);
             const sorted = sortJSONObject(parsed);
-            const formatted = JSON.stringify(sorted, null, 2);
+            const formatted = JSON.stringify(sorted, null, parseInt(indent, 10));
             if (side === 'left') {
                 setLeftValue(formatted);
             } else {
@@ -124,7 +138,7 @@ export function EditorView() {
         } catch (error) {
             toast({ title: 'Sorting Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
-    }, [leftValue, rightValue, toast]);
+    }, [leftValue, rightValue, indent, toast]);
 
     const handleCopyToClipboard = (side: 'left' | 'right') => {
         const value = side === 'left' ? leftValue : rightValue;
@@ -142,10 +156,76 @@ export function EditorView() {
     };
 
     const handleRedo = (side: 'left' | 'right') => {
-        const ref = side === 'left' ? leftEditorRef : rightEditorRef;
+        const ref = side === 'left' ? rightEditorRef : rightEditorRef;
         ref.current?.editor.redo();
     };
+    
+    const handleUpload = (content: string) => {
+        setLeftValue(content);
+        toast({ title: 'File uploaded successfully' });
+    };
 
+    const handleValidate = () => {
+        let leftValid = true;
+        let rightValid = true;
+        try {
+            if(leftValue) JSON.parse(leftValue);
+        } catch {
+            leftValid = false;
+        }
+        try {
+            if(rightValue) JSON.parse(rightValue);
+        } catch {
+            rightValid = false;
+        }
+
+        if (leftValid && rightValid) {
+            toast({ title: 'Validation Successful', description: 'Both JSON documents are valid.' });
+        } else {
+            let description = '';
+            if (!leftValid && !rightValid) description = 'Both JSON documents are invalid.';
+            else if (!leftValid) description = 'The left JSON document is invalid.';
+            else if (!rightValid) description = 'The right JSON document is invalid.';
+            toast({ title: 'Validation Failed', description, variant: 'destructive' });
+        }
+    };
+
+    const handleMinify = () => {
+        try {
+            if (leftValue) {
+                const parsed = JSON.parse(leftValue);
+                setLeftValue(JSON.stringify(parsed));
+            }
+            if (rightValue) {
+                const parsed = JSON.parse(rightValue);
+                setRightValue(JSON.stringify(parsed));
+            }
+            toast({ title: 'JSON Minified' });
+        } catch (error) {
+            toast({ title: 'Minify Error', description: 'Invalid JSON.', variant: 'destructive' });
+        }
+    };
+    
+    const handleDownload = (side: 'left' | 'right') => {
+        const value = side === 'left' ? leftValue : rightValue;
+        if (!value) {
+            toast({ title: 'Nothing to download', variant: 'destructive' });
+            return;
+        }
+        const blob = new Blob([value], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `data-${side}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+    
+    const handleClear = () => {
+        setLeftValue('');
+        setRightValue('');
+        toast({ title: 'Cleared both editors' });
+    };
 
     return (
         <div className="flex flex-1 flex-col md:flex-row h-[calc(100vh-150px)]">
@@ -171,13 +251,21 @@ export function EditorView() {
             </div>
 
             <EditorControls
+                onUpload={handleUpload}
+                onValidate={handleValidate}
+                onFormat={() => handleFormat()}
+                onMinify={handleMinify}
+                onDownload={handleDownload}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}
                 onCopyRightToLeft={() => handleCopy(rightValue, 'left')}
                 onCompare={setIsComparing}
                 isComparing={isComparing}
+                indent={indent}
+                onIndentChange={setIndent}
+                onClear={handleClear}
             />
 
-            <div className="flex-1 flex flex-col border-l border-border">
+            <div className="flex-1 flex flex-col">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
                     onFormat={() => handleFormat('right')}
@@ -186,7 +274,7 @@ export function EditorView() {
                     onRedo={() => handleRedo('right')}
                 />
                 <div className="flex-1 relative">
-                    {rightValue ? (
+                    {rightValue || isComparing ? (
                         <JsonCodeMirror
                             ref={rightEditorRef}
                             value={rightValue}

@@ -55,7 +55,10 @@ export const JsonCodeMirror = forwardRef<
       }));
 
     useEffect(() => {
-        if (isComparing && mergeViewRef.current && !mergeInstanceRef.current) {
+        if (isComparing && mergeViewRef.current) {
+            if (mergeInstanceRef.current) {
+                mergeInstanceRef.current.destroy();
+            }
             mergeInstanceRef.current = new MergeView({
                 a: {
                     doc: otherValue,
@@ -94,13 +97,16 @@ export const JsonCodeMirror = forwardRef<
             mergeInstanceRef.current = null;
         }
 
-        return () => {
-            if (mergeInstanceRef.current) {
-                mergeInstanceRef.current.destroy();
-                mergeInstanceRef.current = null;
-            }
-        };
     }, [isComparing, otherValue, value, resolvedTheme]);
+    
+    useEffect(() => {
+      return () => {
+          if (mergeInstanceRef.current) {
+              mergeInstanceRef.current.destroy();
+              mergeInstanceRef.current = null;
+          }
+      };
+    }, []);
 
     if (isComparing) {
         return <div ref={mergeViewRef} className="absolute inset-0" />;
