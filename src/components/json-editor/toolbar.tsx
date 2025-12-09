@@ -8,7 +8,6 @@ import {
     Download,
     Expand,
     Redo, 
-    Search, 
     Undo, 
     Wrench,
     X
@@ -81,7 +80,7 @@ export function Toolbar({
             
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 px-2 capitalize">
+                    <Button variant="ghost" className="h-8 px-3 text-sm capitalize">
                         {viewMode}
                         <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>

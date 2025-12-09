@@ -34,7 +34,7 @@ export function FormatterTabs() {
   if (isMobile) {
     return (
       <Select value={currentTab} onValueChange={onTabChange}>
-        <SelectTrigger className="w-[150px] md:hidden">
+        <SelectTrigger className="w-[150px] md:hidden rounded-full">
           <SelectValue placeholder="Select a tool" />
         </SelectTrigger>
         <SelectContent>
@@ -50,9 +50,9 @@ export function FormatterTabs() {
 
   return (
     <Tabs value={currentTab} onValueChange={onTabChange} className="hidden md:block">
-      <TabsList className="grid w-full max-w-2xl grid-cols-5 h-10">
+      <TabsList className="grid w-full max-w-2xl grid-cols-5 h-10 rounded-full">
         {tabs.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value}>
+          <TabsTrigger key={tab.value} value={tab.value} className="rounded-full">
             {tab.label.replace(' (Legacy)','')}
           </TabsTrigger>
         ))}
