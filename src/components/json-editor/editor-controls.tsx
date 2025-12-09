@@ -66,7 +66,7 @@ export function EditorControls({ onCopyLeftToRight, onCopyRightToLeft, onCompare
                                 <p>Transform (coming soon)</p>
                             </TooltipContent>
                         </Tooltip>
-                    </TooltipProvider>
+                    </TooltipProvider>_
                 </div>
 
                 <div className="flex flex-col items-center space-y-2">
