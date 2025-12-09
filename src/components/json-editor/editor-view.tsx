@@ -131,6 +131,7 @@ export function EditorView() {
     const handleFormat = useCallback(async (side: 'left' | 'right', outputTo: 'self' | 'right' = 'self') => {
         const value = side === 'left' ? leftValue : rightValue;
         const setter = outputTo === 'right' ? setRightValue : (side === 'left' ? setLeftValue : setRightValue);
+        const viewModeSetter = outputTo === 'right' ? setRightViewMode : (side === 'left' ? setLeftViewMode : setRightViewMode);
         const lang = side === 'left' ? 'json' : rightLang;
 
         if (!value) {
@@ -145,6 +146,7 @@ export function EditorView() {
               tabWidth: parseInt(indent, 10),
             });
             setter(formatted);
+            viewModeSetter('code');
             toast({ title: 'JSON Formatted' });
         } catch (error: any) {
             toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
@@ -210,12 +212,9 @@ export function EditorView() {
         }
 
         if (leftValid && (rightValid || rightLang !== 'json')) {
-            toast({ title: 'Validation Successful', description: 'Both JSON documents are valid.' });
+            toast({ title: 'Validation Successful', description: 'JSON document is valid.' });
         } else {
-            let description = '';
-            if (!leftValid && !rightValid) description = 'Both JSON documents are invalid.';
-            else if (!leftValid) description = 'The left JSON document is invalid.';
-            else if (!rightValid) description = 'The right JSON document is invalid.';
+            let description = 'The JSON document is invalid.';
             toast({ title: 'Validation Failed', description, variant: 'destructive' });
         }
     };
@@ -419,3 +418,5 @@ export function EditorView() {
         </div>
     );
 }
+
+    
