@@ -37,6 +37,7 @@ interface EditorControlsProps {
   onCopyLeftToRight: () => void;
   onCopyRightToLeft: () => void;
   onClear: () => void;
+  onConvert: (format: 'xml' | 'csv') => void;
 }
 
 export function EditorControls({
@@ -52,6 +53,7 @@ export function EditorControls({
   onCopyLeftToRight,
   onCopyRightToLeft,
   onClear,
+  onConvert,
 }: EditorControlsProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -127,12 +129,12 @@ export function EditorControls({
           <Minimize className="mr-2 h-4 w-4" /> Minify / Compact
         </Button>
 
-        <Select>
+        <Select onValueChange={(value: 'xml' | 'csv') => onConvert(value)}>
           <SelectTrigger>
             <SelectValue placeholder="Convert JSON to" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="xml" disabled>XML (coming soon)</SelectItem>
+            <SelectItem value="xml">XML</SelectItem>
             <SelectItem value="csv" disabled>CSV (coming soon)</SelectItem>
           </SelectContent>
         </Select>

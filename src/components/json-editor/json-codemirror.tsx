@@ -3,6 +3,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
+import { xml } from '@codemirror/lang-xml';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { useTheme } from 'next-themes';
 import { history } from '@codemirror/commands';
@@ -20,12 +21,13 @@ interface JsonCodeMirrorProps {
     readonly?: boolean;
     isComparing?: boolean;
     otherValue?: string;
+    language?: 'json' | 'xml';
 }
 
 export const JsonCodeMirror = forwardRef<
   { editor: CodeMirrorEditor },
   JsonCodeMirrorProps
->(({ value, onChange, readonly = false, isComparing = false, otherValue = '' }, ref) => {
+>(({ value, onChange, readonly = false, isComparing = false, otherValue = '', language = 'json' }, ref) => {
     const { resolvedTheme } = useTheme();
     const editorRef = useRef<any>(null);
     const mergeViewRef = useRef<HTMLDivElement>(null);
@@ -113,6 +115,13 @@ export const JsonCodeMirror = forwardRef<
       };
     }, []);
 
+    const extensions = [history()];
+    if (language === 'xml') {
+        extensions.push(xml());
+    } else {
+        extensions.push(json());
+    }
+
     if (!isMounted) {
         return null;
     }
@@ -127,7 +136,7 @@ export const JsonCodeMirror = forwardRef<
                 ref={editorRef}
                 value={value}
                 onChange={onChange}
-                extensions={[json(), history()]}
+                extensions={extensions}
                 theme={resolvedTheme === 'dark' ? okaidia : 'light'}
                 height="100%"
                 readOnly={readonly}

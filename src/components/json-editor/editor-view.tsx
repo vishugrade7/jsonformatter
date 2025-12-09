@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { JsonCodeMirror, type CodeMirrorEditor } from './json-codemirror';
 import { EditorControls } from './editor-controls';
 import { EmptyState } from './empty-state';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format as prettierFormat } from 'prettier/standalone';
 import prettierPluginBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from 'prettier/plugins/estree';
+import { json2xml } from 'xml-js';
 
 const initialJson = `{
   "array": [
@@ -47,6 +48,11 @@ export function EditorView() {
     const [isComparing, setIsComparing] = useState(false);
     const [indent, setIndent] = useState('2');
     const { toast } = useToast();
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const leftEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
     const rightEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
@@ -241,6 +247,26 @@ export function EditorView() {
         toast({ title: 'Expand/Fullscreen coming soon!' });
     }
 
+    const handleConvert = (format: 'xml' | 'csv') => {
+        if (format === 'xml') {
+            try {
+                if (!leftValue) {
+                    toast({ title: 'Input is empty', description: 'Please enter JSON in the left editor to convert.', variant: 'destructive'});
+                    return;
+                }
+                const xml = json2xml(leftValue, { compact: false, spaces: parseInt(indent, 10) });
+                setRightValue(xml);
+                toast({ title: 'Converted to XML' });
+            } catch (e: any) {
+                toast({ title: 'Conversion Error', description: 'Invalid JSON.', variant: 'destructive' });
+            }
+        }
+    };
+
+    if (!isMounted) {
+        return null;
+    }
+
     return (
         <div className="flex flex-1 flex-col md:flex-row h-[calc(100vh-150px)]">
             <div className="flex-1 flex flex-col border-r border-border">
@@ -280,6 +306,7 @@ export function EditorView() {
                 indent={indent}
                 onIndentChange={setIndent}
                 onClear={handleClearAll}
+                onConvert={handleConvert}
             />
 
             <div className="flex-1 flex flex-col">
@@ -301,6 +328,7 @@ export function EditorView() {
                             onChange={setRightValue}
                             isComparing={isComparing}
                             otherValue={leftValue}
+                            language={rightValue.trim().startsWith('<') ? 'xml' : 'json'}
                         />
                     ) : (
                         <EmptyState onCreateObject={() => createObject('right')} onCreateArray={() => createArray('right')} />
