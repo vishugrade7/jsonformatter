@@ -7,7 +7,6 @@ import {
     ChevronDown,
     Download,
     Expand,
-    Filter,
     Redo, 
     Search, 
     Undo, 
@@ -63,10 +62,6 @@ export function Toolbar({
                     <Tooltip>
                         <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSort}><ArrowDownUp className="h-4 w-4" /></Button></TooltipTrigger>
                         <TooltipContent><p>Sort</p></TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><Filter className="h-4 w-4" /></Button></TooltipTrigger>
-                        <TooltipContent><p>Filter (coming soon)</p></TooltipContent>
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onRepair}><Wrench className="h-4 w-4" /></Button></TooltipTrigger>
