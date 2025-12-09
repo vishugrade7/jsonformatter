@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, ChevronLeft, ChevronRight, Copy, Diff } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
@@ -66,20 +66,29 @@ export function EditorControls({ onCopyLeftToRight, onCopyRightToLeft, onCompare
                                 <p>Transform (coming soon)</p>
                             </TooltipContent>
                         </Tooltip>
-                    </TooltipProvider>_
+                    </TooltipProvider>
                 </div>
 
                 <div className="flex flex-col items-center space-y-2">
                     <div className="text-xs font-bold uppercase text-muted-foreground">Differences</div>
-                    <div className="flex items-center space-x-2 pt-2">
-                        <Checkbox id="compare" checked={isComparing} onCheckedChange={(checked) => onCompare(Boolean(checked))} />
-                        <label
-                            htmlFor="compare"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                            Compare
-                        </label>
-                    </div>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center space-x-2 pt-2">
+                                    <Checkbox id="compare" checked={isComparing} onCheckedChange={(checked) => onCompare(Boolean(checked))} />
+                                    <label
+                                        htmlFor="compare"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                    >
+                                        Compare
+                                    </label>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Show differences between the two panes</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
         </Card>
