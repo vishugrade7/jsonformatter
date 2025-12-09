@@ -1,5 +1,5 @@
-import { JsonParserView } from '@/components/json-parser-view';
+import { redirect } from 'next/navigation';
 
 export default function JsonParserPage() {
-    return <JsonParserView />;
+  redirect('/json-editor');
 }

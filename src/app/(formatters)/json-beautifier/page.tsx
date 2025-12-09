@@ -1,11 +1,5 @@
-import { FormatterView } from '@/components/formatter-view';
+import { redirect } from 'next/navigation';
 
 export default function JsonBeautifierPage() {
-  return (
-    <FormatterView
-      language="json"
-      title="JSON Beautifier"
-      description="Format your JSON into a human-readable, indented structure."
-    />
-  );
+  redirect('/json-editor');
 }
