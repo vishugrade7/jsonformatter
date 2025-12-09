@@ -56,6 +56,8 @@ export function EditorView() {
     const [isMounted, setIsMounted] = useState(false);
     const [leftViewMode, setLeftViewMode] = useState<ViewMode>('code');
     const [rightViewMode, setRightViewMode] = useState<ViewMode>('code');
+    const leftPaneRef = useRef<HTMLDivElement>(null);
+    const rightPaneRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setIsMounted(true);
@@ -146,8 +148,7 @@ export function EditorView() {
             });
             
             if (side === 'left') {
-                setRightValue(formatted);
-                setRightViewMode('code');
+                setLeftValue(formatted);
             } else {
                 setRightValue(formatted);
             }
@@ -157,6 +158,26 @@ export function EditorView() {
             toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
     }, [leftValue, rightValue, indent, toast]);
+
+    const handleCentralFormat = useCallback(async () => {
+        if (!leftValue) {
+            toast({ title: 'Input is empty', description: `Editor on the left is empty.`, variant: 'destructive' });
+            return;
+        }
+        
+        try {
+            const formatted = await prettierFormat(leftValue, {
+              parser: 'json',
+              plugins: [prettierPluginBabel, prettierPluginEstree],
+              tabWidth: parseInt(indent, 10),
+            });
+            setRightValue(formatted);
+            setRightViewMode('code');
+            toast({ title: 'JSON Formatted' });
+        } catch (error: any) {
+            toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
+        }
+    }, [leftValue, indent, toast]);
 
 
     const handleSort = useCallback((side: 'left' | 'right') => {
@@ -264,9 +285,23 @@ export function EditorView() {
         toast({ title: 'Cleared both editors' });
     };
 
-    const handleExpand = () => {
-        // Fullscreen logic can be complex, for now we just toast
-        toast({ title: 'Expand/Fullscreen coming soon!' });
+    const handleExpand = (side: 'left' | 'right') => {
+        const paneRef = side === 'left' ? leftPaneRef : rightPaneRef;
+        const elem = paneRef.current;
+
+        if (elem) {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                elem.requestFullscreen().catch(err => {
+                    toast({
+                        title: 'Fullscreen Error',
+                        description: `Could not enter fullscreen mode: ${err.message}`,
+                        variant: 'destructive'
+                    });
+                });
+            }
+        }
     }
 
     const handleRepair = (side: 'left' | 'right') => {
@@ -323,6 +358,12 @@ export function EditorView() {
         } catch (e: any) {
             toast({ title: 'Conversion Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
+    };
+
+    const handleLoadSample = () => {
+        setLeftValue(initialJson);
+        setRightValue('');
+        toast({ title: 'Sample data loaded' });
     };
     
     const onDataChange = useCallback((newData: any, side: 'left' | 'right') => {
@@ -411,7 +452,7 @@ export function EditorView() {
 
     return (
         <div className="flex flex-1 flex-col md:flex-row h-[calc(100vh-150px)]">
-            <div className="flex-1 flex flex-col border-r border-border">
+            <div ref={leftPaneRef} className="flex-1 flex flex-col border-r border-border bg-background">
                 <Toolbar 
                     onCopy={() => handleCopyToClipboard('left')} 
                     onFormat={() => handleFormat('left')}
@@ -420,12 +461,12 @@ export function EditorView() {
                     onRedo={() => handleRedo('left')}
                     onClear={() => handleClearPane('left')}
                     onDownload={() => handleDownload('left')}
-                    onExpand={handleExpand}
+                    onExpand={() => handleExpand('left')}
                     onViewModeChange={setLeftViewMode}
                     viewMode={leftViewMode}
                     onRepair={() => handleRepair('left')}
                 />
-                <div className="flex-1 relative bg-background">
+                <div className="flex-1 relative">
                     {renderPane('left')}
                 </div>
             </div>
@@ -433,7 +474,7 @@ export function EditorView() {
             <EditorControls
                 onUpload={handleUpload}
                 onValidate={handleValidate}
-                onFormat={() => handleFormat('left')}
+                onFormat={handleCentralFormat}
                 onMinify={handleMinify}
                 onDownload={() => handleDownload('left')}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}
@@ -444,9 +485,10 @@ export function EditorView() {
                 onIndentChange={setIndent}
                 onClear={handleClearAll}
                 onConvert={handleConvert}
+                onLoadSample={handleLoadSample}
             />
 
-            <div className="flex-1 flex flex-col">
+            <div ref={rightPaneRef} className="flex-1 flex flex-col bg-background">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
                     onFormat={() => handleFormat('right')}
@@ -455,12 +497,12 @@ export function EditorView() {
                     onRedo={() => handleRedo('right')}
                     onClear={() => handleClearPane('right')}
                     onDownload={() => handleDownload('right')}
-                    onExpand={handleExpand}
+                    onExpand={() => handleExpand('right')}
                     onViewModeChange={setRightViewMode}
                     viewMode={rightViewMode}
                     onRepair={() => handleRepair('right')}
                 />
-                <div className="flex-1 relative bg-background">
+                <div className="flex-1 relative">
                     {renderPane('right')}
                 </div>
             </div>

@@ -7,6 +7,7 @@ import {
   ArrowRightLeft,
   Trash2,
   Minimize,
+  FileJson,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
@@ -38,6 +39,7 @@ interface EditorControlsProps {
   onCopyRightToLeft: () => void;
   onClear: () => void;
   onConvert: (format: 'xml' | 'csv') => void;
+  onLoadSample: () => void;
 }
 
 export function EditorControls({
@@ -54,6 +56,7 @@ export function EditorControls({
   onCopyRightToLeft,
   onClear,
   onConvert,
+  onLoadSample,
 }: EditorControlsProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -89,6 +92,17 @@ export function EditorControls({
           onChange={handleFileChange}
           className="hidden"
         />
+
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={onLoadSample}>
+                        <FileJson className="mr-2 h-4 w-4" /> Load Sample
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Load sample JSON data</p></TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
 
         <TooltipProvider>
             <Tooltip>
@@ -232,5 +246,3 @@ export function EditorControls({
     </div>
   );
 }
-
-    
