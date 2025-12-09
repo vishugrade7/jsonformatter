@@ -6,7 +6,7 @@ export default function FormattersLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="container py-8">
+    <div className="container py-8 max-w-full">
       <div className="flex flex-col items-center">
         <h1 className="text-4xl font-bold tracking-tight text-center font-headline">
           Format, Parse, and Beautify Your Code
