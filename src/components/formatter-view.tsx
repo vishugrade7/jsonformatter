@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useCallback } from 'react';
+import React, { useState, useTransition, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -20,6 +20,31 @@ interface FormatterViewProps {
   title: string;
   description: string;
 }
+
+function IndentSelect({ value, onValueChange }: { value: string, onValueChange: (value: string) => void }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <Skeleton className="w-[180px] h-10" />;
+  }
+  
+  return (
+    <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select indent space" />
+        </SelectTrigger>
+        <SelectContent>
+            <SelectItem value="2">2 Tab Space</SelectItem>
+            <SelectItem value="4">4 Tab Space</SelectItem>
+        </SelectContent>
+    </Select>
+  );
+}
+
 
 export function FormatterView({ language, title, description }: FormatterViewProps) {
   const [input, setInput] = useState('');
@@ -121,22 +146,14 @@ export function FormatterView({ language, title, description }: FormatterViewPro
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Input</CardTitle>
-            <CardDescription>{title}</CardDescription>
+            <CardDescription>{description}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleValidate} disabled={isPending}>
               <ShieldCheck className="h-4 w-4 mr-2" />
               Validate
             </Button>
-            <Select value={indent} onValueChange={setIndent}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select indent space" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="2">2 Tab Space</SelectItem>
-                    <SelectItem value="4">4 Tab Space</SelectItem>
-                </SelectContent>
-            </Select>
+            <IndentSelect value={indent} onValueChange={setIndent} />
             <Button onClick={handleFormat} disabled={isPending}>
               <FileCheck className="h-4 w-4 mr-2" />
               Format

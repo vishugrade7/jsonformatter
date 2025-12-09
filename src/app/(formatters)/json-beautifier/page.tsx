@@ -5,7 +5,7 @@ export default function JsonBeautifierPage() {
     <FormatterView
       language="json"
       title="JSON Beautifier"
-      description="Format your JSON data into a human-readable, indented structure."
+      description="Format your JSON into a human-readable, indented structure."
     />
   );
 }

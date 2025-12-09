@@ -5,7 +5,7 @@ export default function JSBeautifierPage() {
     <FormatterView
       language="javascript"
       title="JavaScript Beautifier"
-      description="Clean up and format your JavaScript code to make it more readable and consistent."
+      description="Format your JS code to make it more readable and consistent."
     />
   );
 }

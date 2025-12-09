@@ -5,7 +5,7 @@ export default function XMLFormatterPage() {
     <FormatterView
       language="xml"
       title="XML Formatter"
-      description="Neatly format your XML documents for improved readability and structure."
+      description="Format your XML for improved readability and structure."
     />
   );
 }
