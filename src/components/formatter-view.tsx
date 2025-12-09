@@ -29,12 +29,12 @@ function IndentSelect({ value, onValueChange }: { value: string, onValueChange: 
   }, []);
 
   if (!isMounted) {
-    return <Skeleton className="w-[180px] h-10" />;
+    return <Skeleton className="w-full h-10" />;
   }
   
   return (
     <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Select indent space" />
         </SelectTrigger>
         <SelectContent>
@@ -143,21 +143,23 @@ export function FormatterView({ language, title, description }: FormatterViewPro
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Input</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleValidate} disabled={isPending}>
-              <ShieldCheck className="h-4 w-4 mr-2" />
-              Validate
-            </Button>
-            <IndentSelect value={indent} onValueChange={setIndent} />
-            <Button onClick={handleFormat} disabled={isPending}>
-              <FileCheck className="h-4 w-4 mr-2" />
-              Format
-            </Button>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle>Input</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+              <Button variant="outline" onClick={handleValidate} disabled={isPending}>
+                <ShieldCheck className="h-4 w-4 mr-2" />
+                Validate
+              </Button>
+              <IndentSelect value={indent} onValueChange={setIndent} />
+              <Button onClick={handleFormat} disabled={isPending}>
+                <FileCheck className="h-4 w-4 mr-2" />
+                Format
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -165,35 +167,37 @@ export function FormatterView({ language, title, description }: FormatterViewPro
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder={`Paste your ${language.toUpperCase()} code here...`}
-            className="min-h-[400px] font-code text-sm resize-none"
+            className="min-h-[300px] md:min-h-[400px] font-code text-sm resize-none"
             aria-label="Code Input"
           />
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-                <CardTitle>Output</CardTitle>
-                <CardDescription>Formatted and beautified code.</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={handleCopy} disabled={!output || isPending}>
-                    <Copy className="h-4 w-4" />
-                    <span className="sr-only">Copy</span>
-                </Button>
-                <Button variant="outline" size="icon" onClick={handleDownload} disabled={!output || isPending}>
-                    <Download className="h-4 w-4" />
-                    <span className="sr-only">Download</span>
-                </Button>
-                <Button variant="destructive" size="icon" onClick={handleClear} disabled={isPending}>
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Clear</span>
-                </Button>
+        <CardHeader>
+          <div className="flex flex-row items-center justify-between">
+              <div>
+                  <CardTitle>Output</CardTitle>
+                  <CardDescription>Formatted and beautified code.</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={handleCopy} disabled={!output || isPending}>
+                      <Copy className="h-4 w-4" />
+                      <span className="sr-only">Copy</span>
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleDownload} disabled={!output || isPending}>
+                      <Download className="h-4 w-4" />
+                      <span className="sr-only">Download</span>
+                  </Button>
+                  <Button variant="destructive" size="icon" onClick={handleClear} disabled={isPending}>
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Clear</span>
+                  </Button>
+              </div>
             </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[400px] rounded-md border bg-muted/50">
+          <ScrollArea className="h-[300px] md:h-[400px] rounded-md border bg-muted/50">
             {isPending ? (
               <div className="p-4 space-y-2">
                 <Skeleton className="h-4 w-full" />

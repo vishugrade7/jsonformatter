@@ -73,13 +73,13 @@ export function EditorControls({
   };
 
   return (
-    <div className="flex flex-col justify-center items-center p-4 bg-card/80 border-x">
-      <div className="flex flex-col space-y-2 w-40">
+    <div className="flex flex-col justify-center items-center p-4 bg-card/80 border-y md:border-y-0 md:border-x">
+      <div className="grid grid-cols-2 md:grid-cols-1 gap-2 w-full md:w-40">
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Button onClick={() => document.getElementById('file-upload')?.click()}>
-                      <Upload className="mr-2 h-4 w-4" /> Upload Data
+                      <Upload className="mr-2 h-4 w-4" /> Upload
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Upload a file from your computer</p></TooltipContent>
@@ -97,7 +97,7 @@ export function EditorControls({
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="outline" onClick={onLoadSample}>
-                        <FileJson className="mr-2 h-4 w-4" /> Load Sample
+                        <FileJson className="mr-2 h-4 w-4" /> Sample
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Load sample JSON data</p></TooltipContent>
@@ -129,53 +129,18 @@ export function EditorControls({
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="outline" onClick={onFormat}>
-                        Format / Beautify
+                        Format
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Format the JSON in the left editor and show the output in the right</p></TooltipContent>
             </Tooltip>
         </TooltipProvider>
-      </div>
-
-      <div className="flex items-center space-x-2 my-4">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onCopyLeftToRight}
-              >
-                <ArrowRightLeft className="h-4 w-4 -rotate-90" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Copy left to right</p>
-            </TooltipContent>
-          </Tooltip>
-           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onCopyRightToLeft}
-              >
-                <ArrowRightLeft className="h-4 w-4 rotate-90" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Copy right to left</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      <div className="flex flex-col space-y-2 w-40">
+        
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Button variant="outline" onClick={onMinify}>
-                      <Minimize className="mr-2 h-4 w-4" /> Minify / Compact
+                      <Minimize className="mr-2 h-4 w-4" /> Minify
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Remove whitespace to compact the JSON</p></TooltipContent>
@@ -184,7 +149,7 @@ export function EditorControls({
 
         <Select onValueChange={(value) => onConvert(value as 'xml' | 'csv')}>
           <SelectTrigger>
-            <SelectValue placeholder="Convert JSON to" />
+            <SelectValue placeholder="Convert to" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="xml">XML</SelectItem>
@@ -199,7 +164,7 @@ export function EditorControls({
                       variant="outline"
                       onClick={() => onDownload('left')}
                     >
-                      <Download className="mr-2 h-4 w-4" /> Download Left
+                      <Download className="mr-2 h-4 w-4" /> Left
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Download the content of the left editor</p></TooltipContent>
@@ -212,7 +177,7 @@ export function EditorControls({
                       variant="outline"
                       onClick={() => onDownload('right')}
                     >
-                      <Download className="mr-2 h-4 w-4" /> Download Right
+                      <Download className="mr-2 h-4 w-4" /> Right
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>Download the content of the right editor</p></TooltipContent>
@@ -220,9 +185,44 @@ export function EditorControls({
          </TooltipProvider>
       </div>
       
-      <div className="border-t w-full my-4"></div>
+      <div className="flex items-center space-x-2 my-2 md:my-4">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCopyLeftToRight}
+                className="hidden md:inline-flex"
+              >
+                <ArrowRightLeft className="h-4 w-4 -rotate-90" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy left to right</p>
+            </TooltipContent>
+          </Tooltip>
+           <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCopyRightToLeft}
+                className="hidden md:inline-flex"
+              >
+                <ArrowRightLeft className="h-4 w-4 rotate-90" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy right to left</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
-      <div className="flex flex-col space-y-2 items-center">
+      <div className="border-t w-full my-2 md:my-4"></div>
+
+      <div className="flex flex-col space-y-2 items-center w-full md:w-auto">
           <div className="flex items-center space-x-2">
             <Checkbox id="compare" checked={isComparing} onCheckedChange={(checked) => onCompare(Boolean(checked))} />
             <label
@@ -235,7 +235,7 @@ export function EditorControls({
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button variant="destructive" onClick={onClear}>
+                    <Button variant="destructive" onClick={onClear} className="w-full md:w-auto">
                         <Trash2 className="mr-2 h-4 w-4" /> Clear All
                     </Button>
                 </TooltipTrigger>

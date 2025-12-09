@@ -300,8 +300,8 @@ export function XmlEditorView() {
     }
 
     return (
-        <div className="flex flex-1 flex-col md:flex-row h-[calc(100vh-150px)]">
-            <div ref={leftPaneRef} className="flex-1 flex flex-col border-r border-border bg-background">
+        <div className="flex flex-1 flex-col md:flex-row h-full md:h-[calc(100vh-150px)]">
+            <div ref={leftPaneRef} className="flex-1 flex flex-col border-b md:border-b-0 md:border-r border-border bg-background h-1/2 md:h-full">
                 <Toolbar 
                     onCopy={() => handleCopyToClipboard('left')} 
                     onFormat={() => handleFormat('left')}
@@ -333,7 +333,7 @@ export function XmlEditorView() {
                 onLoadSample={handleLoadSample}
             />
 
-            <div ref={rightPaneRef} className="flex-1 flex flex-col bg-background">
+            <div ref={rightPaneRef} className="flex-1 flex flex-col bg-background h-1/2 md:h-full">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
                     onFormat={() => handleFormat('right')}
