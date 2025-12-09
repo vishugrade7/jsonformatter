@@ -4,7 +4,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } f
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { xml } from '@codemirror/lang-xml';
-import { okaidia } from '@uiw/react-codemirror-theme-okaidia';
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { useTheme } from 'next-themes';
 import { history } from '@codemirror/commands';
 import { EditorView } from '@codemirror/view';
