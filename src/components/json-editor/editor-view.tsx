@@ -156,7 +156,7 @@ export function EditorView() {
     };
 
     const handleRedo = (side: 'left' | 'right') => {
-        const ref = side === 'left' ? rightEditorRef : rightEditorRef;
+        const ref = side === 'left' ? leftEditorRef : rightEditorRef;
         ref.current?.editor.redo();
     };
     
@@ -220,12 +220,26 @@ export function EditorView() {
         a.click();
         URL.revokeObjectURL(url);
     };
+
+    const handleClearPane = (side: 'left' | 'right') => {
+        if (side === 'left') {
+            setLeftValue('');
+        } else {
+            setRightValue('');
+        }
+        toast({ title: `Cleared ${side} editor` });
+    }
     
-    const handleClear = () => {
+    const handleClearAll = () => {
         setLeftValue('');
         setRightValue('');
         toast({ title: 'Cleared both editors' });
     };
+
+    const handleExpand = () => {
+        // Fullscreen logic can be complex, for now we just toast
+        toast({ title: 'Expand/Fullscreen coming soon!' });
+    }
 
     return (
         <div className="flex flex-1 flex-col md:flex-row h-[calc(100vh-150px)]">
@@ -236,6 +250,9 @@ export function EditorView() {
                     onSort={() => handleSort('left')}
                     onUndo={() => handleUndo('left')}
                     onRedo={() => handleRedo('left')}
+                    onClear={() => handleClearPane('left')}
+                    onDownload={() => handleDownload('left')}
+                    onExpand={handleExpand}
                 />
                 <div className="flex-1 relative">
                     {leftValue ? (
@@ -262,7 +279,7 @@ export function EditorView() {
                 isComparing={isComparing}
                 indent={indent}
                 onIndentChange={setIndent}
-                onClear={handleClear}
+                onClear={handleClearAll}
             />
 
             <div className="flex-1 flex flex-col">
@@ -272,6 +289,9 @@ export function EditorView() {
                     onSort={() => handleSort('right')}
                     onUndo={() => handleUndo('right')}
                     onRedo={() => handleRedo('right')}
+                    onClear={() => handleClearPane('right')}
+                    onDownload={() => handleDownload('right')}
+                    onExpand={handleExpand}
                 />
                 <div className="flex-1 relative">
                     {rightValue || isComparing ? (

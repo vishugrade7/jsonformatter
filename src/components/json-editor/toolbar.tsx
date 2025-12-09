@@ -1,8 +1,26 @@
 'use client';
 
-import { AlignLeft, ArrowDownUp, Copy, ExternalLink, Filter, MoreVertical, Redo, Search, Undo } from "lucide-react";
+import { 
+    AlignLeft, 
+    ArrowDownUp, 
+    Copy, 
+    ChevronDown,
+    Download,
+    Expand,
+    Filter,
+    Redo, 
+    Search, 
+    Undo, 
+    Wrench,
+    X
+} from "lucide-react";
 import { Button } from "../ui/button";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { 
+    DropdownMenu, 
+    DropdownMenuContent, 
+    DropdownMenuItem, 
+    DropdownMenuTrigger 
+} from "../ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface ToolbarProps {
@@ -11,20 +29,24 @@ interface ToolbarProps {
     onSort: () => void;
     onUndo: () => void;
     onRedo: () => void;
+    onClear: () => void;
+    onDownload: () => void;
+    onExpand: () => void;
 }
 
-export function Toolbar({ onCopy, onFormat, onSort, onUndo, onRedo }: ToolbarProps) {
+export function Toolbar({ 
+    onCopy, 
+    onFormat, 
+    onSort, 
+    onUndo, 
+    onRedo,
+    onClear,
+    onDownload,
+    onExpand
+}: ToolbarProps) {
     return (
-        <div className="flex items-center justify-between p-1 border-b border-border bg-card/50">
+        <div className="flex items-center justify-between p-1 border-b border-border bg-card/80">
             <div className="flex items-center">
-                <Tabs defaultValue="tree" className="w-auto">
-                    <TabsList className="grid grid-cols-3 h-8">
-                        <TabsTrigger value="text" className="h-6 px-2 text-xs">text</TabsTrigger>
-                        <TabsTrigger value="tree" className="h-6 px-2 text-xs">tree</TabsTrigger>
-                        <TabsTrigger value="table" className="h-6 px-2 text-xs">table</TabsTrigger>
-                    </TabsList>
-                </Tabs>
-                <div className="h-5 border-l mx-2"></div>
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onFormat}><AlignLeft className="h-4 w-4" /></Button></TooltipTrigger>
@@ -34,18 +56,13 @@ export function Toolbar({ onCopy, onFormat, onSort, onUndo, onRedo }: ToolbarPro
                         <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSort}><ArrowDownUp className="h-4 w-4" /></Button></TooltipTrigger>
                         <TooltipContent><p>Sort</p></TooltipContent>
                     </Tooltip>
-                    <div className="h-5 border-l mx-2"></div>
-                     <Tooltip>
+                    <Tooltip>
                         <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><Filter className="h-4 w-4" /></Button></TooltipTrigger>
                         <TooltipContent><p>Filter (coming soon)</p></TooltipContent>
                     </Tooltip>
                     <Tooltip>
-                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><Search className="h-4 w-4" /></Button></TooltipTrigger>
-                        <TooltipContent><p>Search (coming soon)</p></TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><MoreVertical className="h-4 w-4" /></Button></TooltipTrigger>
-                        <TooltipContent><p>More actions (coming soon)</p></TooltipContent>
+                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><Wrench className="h-4 w-4" /></Button></TooltipTrigger>
+                        <TooltipContent><p>Repair (coming soon)</p></TooltipContent>
                     </Tooltip>
                     <div className="h-5 border-l mx-2"></div>
                     <Tooltip>
@@ -58,8 +75,33 @@ export function Toolbar({ onCopy, onFormat, onSort, onUndo, onRedo }: ToolbarPro
                     </Tooltip>
                 </TooltipProvider>
             </div>
+            
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 px-2">
+                        Code
+                        <ChevronDown className="h-4 w-4 ml-1" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem>Code</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Form</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Text</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Tree</DropdownMenuItem>
+                    <DropdownMenuItem disabled>View</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex items-center">
                 <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClear}><X className="h-4 w-4" /></Button></TooltipTrigger>
+                        <TooltipContent><p>Clear</p></TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownload}><Download className="h-4 w-4" /></Button></TooltipTrigger>
+                        <TooltipContent><p>Download</p></TooltipContent>
+                    </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={onCopy} className="h-8 w-8">
@@ -70,11 +112,11 @@ export function Toolbar({ onCopy, onFormat, onSort, onUndo, onRedo }: ToolbarPro
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
-                                <ExternalLink className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onExpand}>
+                                <Expand className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p>Open in new window (coming soon)</p></TooltipContent>
+                        <TooltipContent><p>Expand / Fullscreen</p></TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
             </div>
