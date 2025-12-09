@@ -36,6 +36,7 @@ interface ToolbarProps {
     onExpand: () => void;
     onViewModeChange: (mode: ViewMode) => void;
     viewMode: ViewMode;
+    onRepair: () => void;
 }
 
 export function Toolbar({ 
@@ -48,7 +49,8 @@ export function Toolbar({
     onDownload,
     onExpand,
     onViewModeChange,
-    viewMode
+    viewMode,
+    onRepair,
 }: ToolbarProps) {
     return (
         <div className="flex items-center justify-between p-1 border-b border-border bg-card/80">
@@ -67,8 +69,8 @@ export function Toolbar({
                         <TooltipContent><p>Filter (coming soon)</p></TooltipContent>
                     </Tooltip>
                     <Tooltip>
-                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" disabled><Wrench className="h-4 w-4" /></Button></TooltipTrigger>
-                        <TooltipContent><p>Repair (coming soon)</p></TooltipContent>
+                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" onClick={onRepair}><Wrench className="h-4 w-4" /></Button></TooltipTrigger>
+                        <TooltipContent><p>Repair</p></TooltipContent>
                     </Tooltip>
                     <div className="h-5 border-l mx-2"></div>
                     <Tooltip>

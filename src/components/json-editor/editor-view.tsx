@@ -73,9 +73,11 @@ export function EditorView() {
             JSON.parse(trimmed);
             return 'json';
         } catch {
+            // It might be CSV or something else, treat as plain text
             return 'text';
         }
     }, [rightValue]);
+
 
     const getParsedJson = useCallback((value: string) => {
         if (!value.trim()) return null;
@@ -129,10 +131,10 @@ export function EditorView() {
         }
     };
 
-    const handleFormat = useCallback(async () => {
-        const value = leftValue;
+    const handleFormat = useCallback(async (side: 'left' | 'right' = 'left') => {
+        const value = side === 'left' ? leftValue : rightValue;
         if (!value) {
-            toast({ title: 'Input is empty', description: `Editor on the left is empty.`, variant: 'destructive' });
+            toast({ title: 'Input is empty', description: `Editor on the ${side} is empty.`, variant: 'destructive' });
             return;
         }
         
@@ -142,13 +144,20 @@ export function EditorView() {
               plugins: [prettierPluginBabel, prettierPluginEstree],
               tabWidth: parseInt(indent, 10),
             });
-            setRightValue(formatted);
-            setRightViewMode('code');
+            
+            if (side === 'left') {
+                setRightValue(formatted);
+                setRightViewMode('code');
+            } else {
+                setRightValue(formatted);
+            }
+
             toast({ title: 'JSON Formatted' });
         } catch (error: any) {
-            toast({ title: 'Formatting Error', description: 'Invalid syntax.', variant: 'destructive' });
+            toast({ title: 'Formatting Error', description: 'Invalid JSON.', variant: 'destructive' });
         }
-    }, [leftValue, indent, toast]);
+    }, [leftValue, rightValue, indent, toast]);
+
 
     const handleSort = useCallback((side: 'left' | 'right') => {
         const value = side === 'left' ? leftValue : rightValue;
@@ -231,11 +240,11 @@ export function EditorView() {
             return;
         }
         const lang = side === 'left' ? 'json' : rightLang;
-        const blob = new Blob([value], { type: lang === 'xml' ? 'application/xml' : 'application/json' });
+        const blob = new Blob([value], { type: lang === 'xml' ? 'application/xml' : lang === 'json' ? 'application/json' : 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `data-${side}.${lang}`;
+        a.download = `data-${side}.${lang === 'text' ? 'csv' : lang}`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -259,6 +268,34 @@ export function EditorView() {
         // Fullscreen logic can be complex, for now we just toast
         toast({ title: 'Expand/Fullscreen coming soon!' });
     }
+
+    const handleRepair = (side: 'left' | 'right') => {
+        const value = side === 'left' ? leftValue : rightValue;
+        if (!value) return;
+
+        try {
+            // A simple repair attempt. More sophisticated logic could be added.
+            // 1. Add missing quotes to keys
+            let repaired = value.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+            // 2. Replace single quotes with double quotes
+            repaired = repaired.replace(/'/g, '"');
+            // 3. Remove trailing commas in objects and arrays
+            repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+            // 4. Add missing commas between properties
+            repaired = repaired.replace(/([}\]"'])\s*\n\s*(["{])/g, '$1,\n$2');
+
+
+            // Validate the repaired json
+            JSON.parse(repaired);
+            
+            const setter = side === 'left' ? setLeftValue : setRightValue;
+            setter(repaired);
+
+            toast({ title: 'JSON Repaired', description: 'Attempted to fix common JSON errors.' });
+        } catch (e) {
+            toast({ title: 'Repair Failed', description: 'Could not automatically repair the JSON.', variant: 'destructive' });
+        }
+    };
 
     const handleConvert = (format: 'xml' | 'csv') => {
         if (!leftValue) {
@@ -377,7 +414,7 @@ export function EditorView() {
             <div className="flex-1 flex flex-col border-r border-border">
                 <Toolbar 
                     onCopy={() => handleCopyToClipboard('left')} 
-                    onFormat={() => handleFormat()}
+                    onFormat={() => handleFormat('left')}
                     onSort={() => handleSort('left')}
                     onUndo={() => handleUndo('left')}
                     onRedo={() => handleRedo('left')}
@@ -386,6 +423,7 @@ export function EditorView() {
                     onExpand={handleExpand}
                     onViewModeChange={setLeftViewMode}
                     viewMode={leftViewMode}
+                    onRepair={() => handleRepair('left')}
                 />
                 <div className="flex-1 relative bg-background">
                     {renderPane('left')}
@@ -395,7 +433,7 @@ export function EditorView() {
             <EditorControls
                 onUpload={handleUpload}
                 onValidate={handleValidate}
-                onFormat={handleFormat}
+                onFormat={() => handleFormat('left')}
                 onMinify={handleMinify}
                 onDownload={() => handleDownload('left')}
                 onCopyLeftToRight={() => handleCopy(leftValue, 'right')}
@@ -411,9 +449,7 @@ export function EditorView() {
             <div className="flex-1 flex flex-col">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
-                    onFormat={() => {
-                        toast({ title: "Cannot format this view", description: "Formatting is only available for the main input editor.", variant: "destructive" });
-                    }}
+                    onFormat={() => handleFormat('right')}
                     onSort={() => handleSort('right')}
                     onUndo={() => handleUndo('right')}
                     onRedo={() => handleRedo('right')}
@@ -422,6 +458,7 @@ export function EditorView() {
                     onExpand={handleExpand}
                     onViewModeChange={setRightViewMode}
                     viewMode={rightViewMode}
+                    onRepair={() => handleRepair('right')}
                 />
                 <div className="flex-1 relative bg-background">
                     {renderPane('right')}
@@ -430,5 +467,3 @@ export function EditorView() {
         </div>
     );
 }
-
-    
