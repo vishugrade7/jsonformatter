@@ -4,13 +4,15 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { JsonCodeMirror, type CodeMirrorEditor } from './json-codemirror';
 import { EditorControls } from './editor-controls';
 import { EmptyState } from './empty-state';
-import { Toolbar } from './toolbar';
+import { Toolbar, type ViewMode } from './toolbar';
 import { useToast } from '@/hooks/use-toast';
 import { format as prettierFormat } from 'prettier/standalone';
 import prettierPluginBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from 'prettier/plugins/estree';
 import { json2xml } from 'xml-js';
 import Papa from 'papaparse';
+import { JsonTreeView } from '../json-tree-view';
+import { ScrollArea } from '../ui/scroll-area';
 
 const initialJson = `{
   "array": [
@@ -50,6 +52,8 @@ export function EditorView() {
     const [indent, setIndent] = useState('2');
     const { toast } = useToast();
     const [isMounted, setIsMounted] = useState(false);
+    const [leftViewMode, setLeftViewMode] = useState<ViewMode>('code');
+    const [rightViewMode, setRightViewMode] = useState<ViewMode>('code');
 
     useEffect(() => {
         setIsMounted(true);
@@ -71,6 +75,18 @@ export function EditorView() {
             return 'json';
         }
     }, [rightValue]);
+
+    const getParsedJson = useCallback((value: string) => {
+        if (!value.trim()) return null;
+        try {
+            return JSON.parse(value);
+        } catch {
+            return { error: 'Invalid JSON' };
+        }
+    }, []);
+
+    const leftParsedJson = useMemo(() => getParsedJson(leftValue), [leftValue, getParsedJson]);
+    const rightParsedJson = useMemo(() => getParsedJson(rightValue), [rightValue, getParsedJson]);
 
     const handleCopy = useCallback((from: string, to: 'left' | 'right') => {
         try {
@@ -94,8 +110,10 @@ export function EditorView() {
         const objectJson = JSON.stringify({}, null, parseInt(indent, 10));
         if (side === 'left') {
             setLeftValue(objectJson);
+            setLeftViewMode('code');
         } else {
             setRightValue(objectJson);
+            setRightViewMode('code');
         }
     };
 
@@ -103,8 +121,10 @@ export function EditorView() {
         const arrayJson = JSON.stringify([], null, parseInt(indent, 10));
         if (side === 'left') {
             setLeftValue(arrayJson);
+            setLeftViewMode('code');
         } else {
             setRightValue(arrayJson);
+            setRightViewMode('code');
         }
     };
 
@@ -272,6 +292,7 @@ export function EditorView() {
             if (format === 'xml') {
                 const xml = json2xml(leftValue, { compact: false, spaces: parseInt(indent, 10) });
                 setRightValue(xml);
+                setRightViewMode('code');
                 toast({ title: 'Converted to XML' });
             } else if (format === 'csv') {
                 const json = JSON.parse(leftValue);
@@ -281,6 +302,7 @@ export function EditorView() {
                 }
                 const csv = Papa.unparse(json);
                 setRightValue(csv);
+                setRightViewMode('code');
                 toast({ title: 'Converted to CSV' });
             }
         } catch (e: any) {
@@ -290,6 +312,65 @@ export function EditorView() {
 
     if (!isMounted) {
         return null;
+    }
+    
+    const renderLeftPane = () => {
+        if (!leftValue) {
+            return <EmptyState onCreateObject={() => createObject('left')} onCreateArray={() => createArray('left')} />;
+        }
+        switch (leftViewMode) {
+            case 'tree':
+                if (leftParsedJson?.error) {
+                    return <div className="p-4 text-destructive">Invalid JSON for Tree view.</div>;
+                }
+                return (
+                    <ScrollArea className="h-full">
+                        <div className="p-4">
+                            <JsonTreeView data={leftParsedJson} />
+                        </div>
+                    </ScrollArea>
+                );
+            case 'code':
+            default:
+                 return (
+                    <JsonCodeMirror
+                        ref={leftEditorRef}
+                        value={leftValue}
+                        onChange={setLeftValue}
+                    />
+                );
+        }
+    }
+
+    const renderRightPane = () => {
+        if (!rightValue && !isComparing) {
+            return <EmptyState onCreateObject={() => createObject('right')} onCreateArray={() => createArray('right')} />;
+        }
+         switch (rightViewMode) {
+            case 'tree':
+                if (rightParsedJson?.error) {
+                    return <div className="p-4 text-destructive">Invalid JSON for Tree view.</div>;
+                }
+                return (
+                    <ScrollArea className="h-full">
+                         <div className="p-4">
+                            <JsonTreeView data={rightParsedJson} />
+                        </div>
+                    </ScrollArea>
+                );
+            case 'code':
+            default:
+                return (
+                    <JsonCodeMirror
+                        ref={rightEditorRef}
+                        value={rightValue}
+                        onChange={setRightValue}
+                        isComparing={isComparing}
+                        otherValue={leftValue}
+                        language={rightLang}
+                    />
+                );
+        }
     }
 
     return (
@@ -304,17 +385,11 @@ export function EditorView() {
                     onClear={() => handleClearPane('left')}
                     onDownload={() => handleDownload('left')}
                     onExpand={handleExpand}
+                    onViewModeChange={setLeftViewMode}
+                    viewMode={leftViewMode}
                 />
-                <div className="flex-1 relative">
-                    {leftValue ? (
-                        <JsonCodeMirror
-                            ref={leftEditorRef}
-                            value={leftValue}
-                            onChange={setLeftValue}
-                        />
-                    ) : (
-                        <EmptyState onCreateObject={() => createObject('left')} onCreateArray={() => createArray('left')} />
-                    )}
+                <div className="flex-1 relative bg-background">
+                    {renderLeftPane()}
                 </div>
             </div>
 
@@ -344,20 +419,11 @@ export function EditorView() {
                     onClear={() => handleClearPane('right')}
                     onDownload={() => handleDownload('right')}
                     onExpand={handleExpand}
+                    onViewModeChange={setRightViewMode}
+                    viewMode={rightViewMode}
                 />
-                <div className="flex-1 relative">
-                    {rightValue || isComparing ? (
-                        <JsonCodeMirror
-                            ref={rightEditorRef}
-                            value={rightValue}
-                            onChange={setRightValue}
-                            isComparing={isComparing}
-                            otherValue={leftValue}
-                            language={rightLang}
-                        />
-                    ) : (
-                        <EmptyState onCreateObject={() => createObject('right')} onCreateArray={() => createArray('right')} />
-                    )}
+                <div className="flex-1 relative bg-background">
+                    {renderRightPane()}
                 </div>
             </div>
         </div>

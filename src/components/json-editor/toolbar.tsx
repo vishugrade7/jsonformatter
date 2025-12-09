@@ -23,6 +23,8 @@ import {
 } from "../ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
+export type ViewMode = 'code' | 'tree' | 'form' | 'text' | 'view';
+
 interface ToolbarProps {
     onCopy: () => void;
     onFormat: () => void;
@@ -32,6 +34,8 @@ interface ToolbarProps {
     onClear: () => void;
     onDownload: () => void;
     onExpand: () => void;
+    onViewModeChange: (mode: ViewMode) => void;
+    viewMode: ViewMode;
 }
 
 export function Toolbar({ 
@@ -42,7 +46,9 @@ export function Toolbar({
     onRedo,
     onClear,
     onDownload,
-    onExpand
+    onExpand,
+    onViewModeChange,
+    viewMode
 }: ToolbarProps) {
     return (
         <div className="flex items-center justify-between p-1 border-b border-border bg-card/80">
@@ -78,16 +84,16 @@ export function Toolbar({
             
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 px-2">
-                        Code
+                    <Button variant="ghost" className="h-8 px-2 capitalize">
+                        {viewMode}
                         <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem>Code</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onViewModeChange('code')}>Code</DropdownMenuItem>
                     <DropdownMenuItem disabled>Form</DropdownMenuItem>
                     <DropdownMenuItem disabled>Text</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Tree</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onViewModeChange('tree')}>Tree</DropdownMenuItem>
                     <DropdownMenuItem disabled>View</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
