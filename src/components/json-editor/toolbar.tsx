@@ -91,10 +91,10 @@ export function Toolbar({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuItem onSelect={() => onViewModeChange('code')}>Code</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Form</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Text</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onViewModeChange('form')}>Form</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onViewModeChange('text')}>Text</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => onViewModeChange('tree')}>Tree</DropdownMenuItem>
-                    <DropdownMenuItem disabled>View</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => onViewModeChange('view')}>View</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 

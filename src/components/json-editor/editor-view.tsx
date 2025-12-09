@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format as prettierFormat } from 'prettier/standalone';
 import prettierPluginBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from 'prettier/plugins/estree';
+import prettierPluginXml from '@prettier/plugin-xml';
 import { json2xml } from 'xml-js';
 import Papa from 'papaparse';
 import { JsonTreeView } from '../json-tree-view';
@@ -62,7 +63,7 @@ export function EditorView() {
     const leftEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
     const rightEditorRef = useRef<{ editor: CodeMirrorEditor } | null>(null);
 
-    const rightLang = useMemo<'json' | 'xml'>(() => {
+    const rightLang = useMemo<'json' | 'xml' | 'text'>(() => {
         const trimmed = rightValue.trim();
         if (trimmed.startsWith('<')) {
             return 'xml';
@@ -71,8 +72,7 @@ export function EditorView() {
             JSON.parse(trimmed);
             return 'json';
         } catch {
-            // It could be CSV or something else, default to json for highlighting
-            return 'json';
+            return 'text';
         }
     }, [rightValue]);
 
@@ -130,12 +130,8 @@ export function EditorView() {
 
     const handleFormat = useCallback(async (side: 'left' | 'right', outputTo: 'self' | 'right' = 'self') => {
         const value = side === 'left' ? leftValue : rightValue;
+        const setter = outputTo === 'right' ? setRightValue : (side === 'left' ? setLeftValue : setRightValue);
         const lang = side === 'left' ? 'json' : rightLang;
-        let setter = side === 'left' ? setLeftValue : setRightValue;
-        
-        if (outputTo === 'right') {
-            setter = setRightValue;
-        }
 
         if (!value) {
             toast({ title: 'Input is empty', description: `Editor on the ${side} is empty.`, variant: 'destructive' });
@@ -144,8 +140,8 @@ export function EditorView() {
         
         try {
             const formatted = await prettierFormat(value, {
-              parser: lang,
-              plugins: [prettierPluginBabel, prettierPluginEstree],
+              parser: lang === 'text' ? 'json' : lang, // Default to json parser for text
+              plugins: [prettierPluginBabel, prettierPluginEstree, prettierPluginXml],
               tabWidth: parseInt(indent, 10),
             });
             setter(formatted);
@@ -232,6 +228,7 @@ export function EditorView() {
         try {
             const parsed = JSON.parse(leftValue);
             setRightValue(JSON.stringify(parsed));
+            setRightViewMode('code');
             toast({ title: 'JSON Minified' });
         } catch (error) {
             toast({ title: 'Minify Error', description: 'Invalid JSON.', variant: 'destructive' });
@@ -306,60 +303,61 @@ export function EditorView() {
         return null;
     }
     
-    const renderLeftPane = () => {
-        if (!leftValue) {
-            return <EmptyState onCreateObject={() => createObject('left')} onCreateArray={() => createArray('left')} />;
+    const renderPane = (side: 'left' | 'right') => {
+        const value = side === 'left' ? leftValue : rightValue;
+        const viewMode = side === 'left' ? leftViewMode : rightViewMode;
+        const parsedJson = side === 'left' ? leftParsedJson : rightParsedJson;
+        const lang = side === 'left' ? 'json' : rightLang;
+        const onChange = side === 'left' ? setLeftValue : setRightValue;
+        const editorRef = side === 'left' ? leftEditorRef : rightEditorRef;
+        
+        if (!value && !(side === 'right' && isComparing)) {
+             return <EmptyState onCreateObject={() => createObject(side)} onCreateArray={() => createArray(side)} />;
         }
-        switch (leftViewMode) {
+
+        switch (viewMode) {
             case 'tree':
-                if (leftParsedJson?.error) {
+                if (parsedJson?.error) {
                     return <div className="p-4 text-destructive">Invalid JSON for Tree view.</div>;
                 }
                 return (
                     <ScrollArea className="h-full">
                         <div className="p-4">
-                            <JsonTreeView data={leftParsedJson} />
+                            <JsonTreeView data={parsedJson} />
                         </div>
                     </ScrollArea>
+                );
+            case 'form':
+                return <div className="p-4 text-muted-foreground">Form view coming soon...</div>;
+            case 'text':
+                return (
+                    <JsonCodeMirror
+                        ref={editorRef}
+                        value={value}
+                        onChange={onChange}
+                        language="text"
+                    />
+                );
+            case 'view':
+                 return (
+                    <JsonCodeMirror
+                        ref={editorRef}
+                        value={value}
+                        onChange={onChange}
+                        language={lang}
+                        readonly={true}
+                    />
                 );
             case 'code':
             default:
                  return (
                     <JsonCodeMirror
-                        ref={leftEditorRef}
-                        value={leftValue}
-                        onChange={setLeftValue}
-                    />
-                );
-        }
-    }
-
-    const renderRightPane = () => {
-        if (!rightValue && !isComparing) {
-            return <EmptyState onCreateObject={() => createObject('right')} onCreateArray={() => createArray('right')} />;
-        }
-         switch (rightViewMode) {
-            case 'tree':
-                if (rightParsedJson?.error) {
-                    return <div className="p-4 text-destructive">Invalid JSON for Tree view.</div>;
-                }
-                return (
-                    <ScrollArea className="h-full">
-                         <div className="p-4">
-                            <JsonTreeView data={rightParsedJson} />
-                        </div>
-                    </ScrollArea>
-                );
-            case 'code':
-            default:
-                return (
-                    <JsonCodeMirror
-                        ref={rightEditorRef}
-                        value={rightValue}
-                        onChange={setRightValue}
-                        isComparing={isComparing}
+                        ref={editorRef}
+                        value={value}
+                        onChange={onChange}
+                        isComparing={side === 'right' && isComparing}
                         otherValue={leftValue}
-                        language={rightLang}
+                        language={lang}
                     />
                 );
         }
@@ -370,7 +368,7 @@ export function EditorView() {
             <div className="flex-1 flex flex-col border-r border-border">
                 <Toolbar 
                     onCopy={() => handleCopyToClipboard('left')} 
-                    onFormat={() => handleFormat('left')}
+                    onFormat={() => handleFormat('left', 'self')}
                     onSort={() => handleSort('left')}
                     onUndo={() => handleUndo('left')}
                     onRedo={() => handleRedo('left')}
@@ -381,7 +379,7 @@ export function EditorView() {
                     viewMode={leftViewMode}
                 />
                 <div className="flex-1 relative bg-background">
-                    {renderLeftPane()}
+                    {renderPane('left')}
                 </div>
             </div>
 
@@ -404,7 +402,7 @@ export function EditorView() {
             <div className="flex-1 flex flex-col">
                  <Toolbar 
                     onCopy={() => handleCopyToClipboard('right')} 
-                    onFormat={() => handleFormat('right')}
+                    onFormat={() => handleFormat('right', 'self')}
                     onSort={() => handleSort('right')}
                     onUndo={() => handleUndo('right')}
                     onRedo={() => handleRedo('right')}
@@ -415,7 +413,7 @@ export function EditorView() {
                     viewMode={rightViewMode}
                 />
                 <div className="flex-1 relative bg-background">
-                    {renderRightPane()}
+                    {renderPane('right')}
                 </div>
             </div>
         </div>
