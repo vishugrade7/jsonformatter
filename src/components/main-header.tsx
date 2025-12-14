@@ -15,9 +15,9 @@ export function MainHeader() {
             </svg>
             <span className="font-bold font-headline hidden sm:inline-block">JSONformatter</span>
           </Link>
-          <FormatterTabs />
         </div>
-        <div className="flex flex-1 items-center justify-end">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <FormatterTabs />
           <ThemeToggle />
         </div>
       </div>
