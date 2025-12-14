@@ -30,6 +30,10 @@ export function FormatterTabs() {
   const onTabChange = (value: string) => {
     router.push(`/${value}`);
   };
+
+  const isClient = useIsMobile();
+
+  if (!isClient) return null;
   
   if (isMobile) {
     return (
