@@ -7,6 +7,9 @@ import { useTheme } from 'next-themes';
 import { javascript } from '@codemirror/lang-javascript';
 import { json } from '@codemirror/lang-json';
 import { xml } from '@codemirror/lang-xml';
+import { html } from '@codemirror/lang-html';
+import { java } from '@codemirror/lang-java';
+import { python } from '@codemirror/lang-python';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { Language } from '@/lib/language-detect';
 import { ViewMode } from './toolbar';
@@ -43,6 +46,13 @@ export const DiffCodeMirror = ({ left, right, onLeftChange, onRightChange, langu
                 return javascript({ jsx: true, typescript: true });
             case 'xml':
                 return xml();
+            case 'html':
+                return html();
+            case 'java':
+            case 'apex':
+                return java();
+            case 'python':
+                return python();
             case 'json':
             default:
                 return json();
@@ -51,6 +61,10 @@ export const DiffCodeMirror = ({ left, right, onLeftChange, onRightChange, langu
 
     useEffect(() => {
         if (mergeViewRef.current && isMounted) {
+            if (mergeInstanceRef.current) {
+                mergeInstanceRef.current.destroy();
+            }
+            
             const theme = resolvedTheme === 'dark' ? okaidia : EditorView.baseTheme({});
             const highlightTheme = EditorView.theme({
                 '&': {
@@ -102,14 +116,9 @@ export const DiffCodeMirror = ({ left, right, onLeftChange, onRightChange, langu
             }
 
 
-            if (mergeInstanceRef.current) {
-                // If view exists, just update its configuration
-                mergeInstanceRef.current.reconfigure(config);
-            } else {
-                 // Otherwise, create a new one
-                mergeInstanceRef.current = new MergeView(config);
-            }
+            mergeInstanceRef.current = new MergeView(config);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMounted, resolvedTheme, language, viewMode]);
 
     // This effect handles external updates to `left` and `right` values

@@ -65,6 +65,10 @@ export function Toolbar({
                         <SelectItem value="json">JSON</SelectItem>
                         <SelectItem value="javascript">JavaScript</SelectItem>
                         <SelectItem value="xml">XML</SelectItem>
+                        <SelectItem value="html">HTML</SelectItem>
+                        <SelectItem value="java">Java</SelectItem>
+                        <SelectItem value="python">Python</SelectItem>
+                        <SelectItem value="apex">Apex</SelectItem>
                         <SelectItem value="text">Text</SelectItem>
                     </SelectContent>
                 </Select>
