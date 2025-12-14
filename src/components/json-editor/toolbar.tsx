@@ -51,7 +51,7 @@ export function Toolbar({
     onRepair,
 }: ToolbarProps) {
     return (
-        <div className="flex items-center justify-between p-1 border-b border-border bg-card/80 backdrop-blur-md">
+        <div className="flex items-center justify-between p-1 border-b border-border bg-background/60 backdrop-blur-lg">
             <div className="flex items-center">
                 <TooltipProvider>
                     <Tooltip>
