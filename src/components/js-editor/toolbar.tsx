@@ -45,7 +45,7 @@ export function Toolbar({
     viewMode,
 }: ToolbarProps) {
     return (
-        <div className="flex items-center justify-between p-1 border-b border-border bg-card/60 backdrop-blur">
+        <div className="flex items-center justify-between p-1 border-b border-border bg-card/80 backdrop-blur-md">
             <div className="flex items-center">
                 <TooltipProvider>
                     <Tooltip>
