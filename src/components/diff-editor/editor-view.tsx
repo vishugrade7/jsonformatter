@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { DiffCodeMirror } from './diff-codemirror';
-import { EditorControls } from './editor-controls';
 import { Toolbar, type ViewMode } from './toolbar';
 import { useToast } from '@/hooks/use-toast';
 import { Language, detectLanguage } from '@/lib/language-detect';
@@ -74,13 +73,16 @@ export function DiffEditorView() {
     }
     
     return (
-        <div className="flex flex-1 flex-col md:flex-row h-full md:h-[calc(100vh-150px)]">
-            <div ref={editorPaneRef} className="flex-1 flex flex-col border-b md:border-b-0 md:border-r border-border bg-background h-full md:h-full">
+        <div className="flex flex-1 flex-col h-full md:h-auto">
+            <div ref={editorPaneRef} className="flex-1 flex flex-col border-b md:border-b-0 border-border bg-background h-full">
                 <Toolbar
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
                     language={language}
                     onLanguageChange={setLanguage}
+                    onUpload={handleUpload}
+                    onClear={handleClearAll}
+                    onSwap={handleSwap}
                 />
                 <div className="flex-1 relative">
                     <DiffCodeMirror
@@ -93,12 +95,6 @@ export function DiffEditorView() {
                     />
                 </div>
             </div>
-
-            <EditorControls
-                onUpload={handleUpload}
-                onClear={handleClearAll}
-                onSwap={handleSwap}
-            />
         </div>
     );
 }
