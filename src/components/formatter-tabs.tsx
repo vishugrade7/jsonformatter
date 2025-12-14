@@ -31,9 +31,7 @@ export function FormatterTabs() {
     router.push(`/${value}`);
   };
 
-  const isClient = useIsMobile();
-
-  if (!isClient) return null;
+  if (isMobile === null) return null;
   
   if (isMobile) {
     return (
@@ -53,7 +51,7 @@ export function FormatterTabs() {
   }
 
   return (
-    <Tabs value={currentTab} onValueChange={onTabChange} className="hidden md:block">
+    <Tabs value={currentTab} onValueChange={onTabChange} className="md:block">
       <TabsList className="h-11 rounded-full bg-gray-800/80 p-1.5">
         {tabs.map(tab => (
           <TabsTrigger 
