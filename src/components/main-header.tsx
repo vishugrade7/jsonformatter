@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { FormatterTabs } from './formatter-tabs';
+import { ThemeToggle } from './theme-toggle';
 
 export function MainHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-gray-900/60">
-      <div className="container flex h-16 items-center">
-        <div className="mr-auto flex items-center">
+      <div className="container flex h-16 max-w-screen-2xl items-center">
+        <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="h-6 w-6 text-primary">
                 <rect width="256" height="256" fill="none"></rect>
@@ -15,11 +16,11 @@ export function MainHeader() {
             <span className="font-bold font-headline sm:inline-block">Formatastic</span>
           </Link>
         </div>
-        <div className="flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <FormatterTabs />
         </div>
-        <div className="ml-auto">
-          {/* Future elements can go here */}
+        <div className="flex items-center space-x-2">
+           {/* Future elements can go here */}
         </div>
       </div>
     </header>
