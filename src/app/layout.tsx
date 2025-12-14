@@ -5,7 +5,7 @@ import { MainHeader } from '@/components/main-header';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'JSONformatter - The Ultimate JSON Tool',
+  title: 'Formatastic - The Ultimate Code Formatter',
   description: 'An elegant and powerful tool to format, parse, and beautify your code, including JSON, XML, and JavaScript.',
 };
 
