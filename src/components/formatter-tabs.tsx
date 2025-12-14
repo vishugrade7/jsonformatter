@@ -15,9 +15,6 @@ const tabs = [
   { value: 'json-editor', label: 'JSON Editor' },
   { value: 'xml-editor', label: 'XML Editor' },
   { value: 'js-beautifier', label: 'JS Beautifier' },
-  { value: 'json-beautifier', label: 'JSON Beautifier (Legacy)' },
-  { value: 'json-parser', label: 'JSON Parser (Legacy)' },
-  
 ];
 
 export function FormatterTabs() {
@@ -50,7 +47,7 @@ export function FormatterTabs() {
 
   return (
     <Tabs value={currentTab} onValueChange={onTabChange} className="hidden md:block">
-      <TabsList className="grid w-full max-w-2xl grid-cols-5 h-10 rounded-full">
+      <TabsList className="grid w-full max-w-lg grid-cols-3 h-10 rounded-full">
         {tabs.map(tab => (
           <TabsTrigger key={tab.value} value={tab.value} className="rounded-full">
             {tab.label.replace(' (Legacy)','')}
