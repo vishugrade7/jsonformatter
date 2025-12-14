@@ -11,11 +11,6 @@ import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { Language } from '@/lib/language-detect';
 import { ViewMode } from './toolbar';
 
-export interface CodeMirrorEditor {
-  undo: () => void;
-  redo: () => void;
-}
-
 interface DiffCodeMirrorProps {
     left: string;
     right: string;
@@ -93,7 +88,9 @@ export const DiffCodeMirror = ({ left, right, onLeftChange, onRightChange, langu
                         })
                     ]
                 },
-                merge: viewMode === 'split' ? true : undefined,
+                merge: viewMode === 'split' ? undefined : {
+                    revert: 'a-to-b'
+                },
                 revertControls: 'revert-a',
                 parent: mergeViewRef.current,
             });

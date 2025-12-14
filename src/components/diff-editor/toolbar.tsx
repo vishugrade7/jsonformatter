@@ -1,17 +1,10 @@
 'use client';
 
 import { 
-    ChevronDown,
     Split,
     Rows
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuTrigger 
-} from "../ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -20,6 +13,7 @@ import {
   SelectValue,
 } from '../ui/select';
 import { Language } from "@/lib/language-detect";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 export type ViewMode = 'split' | 'unified';
 
@@ -37,10 +31,10 @@ export function Toolbar({
     onLanguageChange,
 }: ToolbarProps) {
     return (
-        <div className="flex items-center justify-between p-1 border-b border-border bg-background/60 backdrop-blur-lg">
-            <div className="flex items-center">
+        <div className="flex items-center justify-between p-1 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center w-[150px]">
                  <Select value={language} onValueChange={(v) => onLanguageChange(v as Language)}>
-                    <SelectTrigger className="w-[120px] rounded-full h-8 text-sm">
+                    <SelectTrigger className="w-full h-8 text-sm">
                         <SelectValue placeholder="Language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -53,17 +47,29 @@ export function Toolbar({
             </div>
             
             <div className="flex items-center">
-                <Button variant={viewMode === 'split' ? "secondary" : "ghost"} size="icon" className="h-8 w-8 rounded-full" onClick={() => onViewModeChange('split')}>
-                    <Split className="h-4 w-4" />
-                </Button>
-                 <Button variant={viewMode === 'unified' ? "secondary" : "ghost"} size="icon" className="h-8 w-8 rounded-full" onClick={() => onViewModeChange('unified')}>
-                    <Rows className="h-4 w-4" />
-                </Button>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant={viewMode === 'split' ? "secondary" : "ghost"} size="icon" className="h-8 w-8" onClick={() => onViewModeChange('split')}>
+                                <Split className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Side-by-side</p></TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant={viewMode === 'unified' ? "secondary" : "ghost"} size="icon" className="h-8 w-8" onClick={() => onViewModeChange('unified')}>
+                                <Rows className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Inline</p></TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
 
 
-            <div className="flex items-center w-[120px]">
-               
+            <div className="flex items-center w-[150px]">
+               {/* Spacer */}
             </div>
         </div>
     );
