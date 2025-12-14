@@ -10,12 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { Code, GitCompare, Braces, FileJson } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const tabs = [
-  { value: 'json-editor', label: 'JSON Editor' },
-  { value: 'xml-editor', label: 'XML Editor' },
-  { value: 'js-beautifier', label: 'JS Beautifier' },
-  { value: 'code-compare', label: 'Code Compare' },
+  { value: 'json-editor', label: 'JSON Editor', icon: Braces },
+  { value: 'xml-editor', label: 'XML Editor', icon: Code },
+  { value: 'js-beautifier', label: 'JS Beautifier', icon: FileJson },
+  { value: 'code-compare', label: 'Code Compare', icon: GitCompare },
 ];
 
 export function FormatterTabs() {
@@ -48,10 +50,18 @@ export function FormatterTabs() {
 
   return (
     <Tabs value={currentTab} onValueChange={onTabChange} className="hidden md:block">
-      <TabsList className="grid w-full max-w-lg grid-cols-4 h-10 rounded-full">
+      <TabsList className="h-11 rounded-full bg-gray-800/80 p-1.5">
         {tabs.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value} className="rounded-full">
-            {tab.label.replace(' (Legacy)','')}
+          <TabsTrigger 
+            key={tab.value} 
+            value={tab.value} 
+            className={cn(
+              "rounded-full h-full px-4 text-gray-400 data-[state=active]:text-primary-foreground data-[state=active]:bg-primary",
+              "flex items-center gap-2"
+            )}
+          >
+            <tab.icon className="h-4 w-4" />
+            {tab.label}
           </TabsTrigger>
         ))}
       </TabsList>
