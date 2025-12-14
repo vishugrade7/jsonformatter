@@ -6,8 +6,8 @@ export function MainHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <div className="mr-4 flex items-center">
-          <Link href="/" className="mr-2 md:mr-6 flex items-center space-x-2">
+        <div className="flex flex-1 items-center space-x-2">
+          <Link href="/" className="mr-2 md:mr-4 flex items-center space-x-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="h-6 w-6 text-primary">
                 <rect width="256" height="256" fill="none"></rect>
                 <path d="M75.3,48.3a12,12,0,0,0-10.6,10.6l-32,128a12,12,0,0,0,21.2,13.8L64,176h64l10.1,24.7a12,12,0,0,0,21.2-13.8l-32-128A12,12,0,0,0,116.7,48.3ZM98.8,112,112,77.2,125.2,112Z" fill="currentColor"></path>
@@ -15,8 +15,6 @@ export function MainHeader() {
             </svg>
             <span className="font-bold font-headline hidden sm:inline-block">JSONformatter</span>
           </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
           <FormatterTabs />
           <ThemeToggle />
         </div>
